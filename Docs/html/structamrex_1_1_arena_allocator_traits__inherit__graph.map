@@ -1,0 +1,7 @@
+<map id="amrex::ArenaAllocatorTraits" name="amrex::ArenaAllocatorTraits">
+<area shape="rect" id="node1" title=" " alt="" coords="5,81,189,108"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_arena_allocator.html" title=" " alt="" coords="263,5,446,32"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_device_arena_allocator.html" title=" " alt="" coords="243,56,466,83"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_managed_arena_allocator.html" title=" " alt="" coords="237,107,472,133"/>
+<area shape="rect" id="node5" href="$classamrex_1_1_pinned_arena_allocator.html" title=" " alt="" coords="243,157,466,184"/>
+</map>

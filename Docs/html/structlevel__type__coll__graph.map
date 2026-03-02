@@ -1,0 +1,5 @@
+<map id="level_type" name="level_type">
+<area shape="rect" id="node1" title=" " alt="" coords="66,124,147,151"/>
+<area shape="rect" id="node2" href="$structbox__type.html" title=" " alt="" coords="5,5,80,32"/>
+<area shape="rect" id="node3" href="$structcommunicator__type.html" title=" " alt="" coords="104,5,240,32"/>
+</map>

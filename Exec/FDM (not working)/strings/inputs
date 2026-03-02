@@ -1,0 +1,123 @@
+# ------------------  INPUTS TO MAIN PROGRAM  -------------------
+
+# TIME STEP CONTROL
+nyx.string_dt             = 1.0       # in units 1.5dx/sqrt(msa**2+12)
+stop_time                 = 128.0
+
+# INITIAL CONDITIONS
+#amr.restart               = ./chk00200
+nyx.do_readin_ics         = 1
+nyx.readin_ics_fname      = ../save0
+nyx.jaxions_ic            = 0
+
+# PROBLEM SIZE & GEOMETRY
+geometry.is_periodic      = 1 1 1
+geometry.coord_sys        = 0
+geometry.prob_lo          = 0.0 0.0 0.0
+geometry.prob_hi          = 256.0 256.0 256.0
+amr.n_cell                = 256 256 256
+amr.max_grid_size         = 64
+amr.blocking_factor       = 8
+
+# INTEGRATION METHODS
+nyx.levelmethod           = 0 0 0 0  # which method to use 3=spectral, 0=finite_difference
+nyx.order                 = 2        # nth order spectral method 2 or 6
+
+# STRING PHYSICS
+nyx.fixmodulus            = 1 0 0 0  # 1 = fix axion field modulus, 0 = don't fix it
+nyx.msa                   = 1.0      # string tension in units 1/delta/time meaning 1/a/tau
+nyx.prsstring             = 1        # prsstring = 1 , physstring = 0
+nyx.string_time1          = 50.0     # defines string mass term
+nyx.string_n              = 2.0      # defines string mass term
+#nyx.string_stop_time     = 256      # final time of string simulation, needed only for coupling of physical strings
+nyx.sigmalut              = 0.05     # in units 1/dx of root grid
+nyx.nstep_spectrum        = 10       # how often do we want to output string spectrum
+nyx.string_massterm       = 1        # 1 = add the mass term to string evolution, 0 = don't add it
+nyx.interpolator          = 1        # 1 = bilinear interpolation , 2 = quartic interpolation
+nyx.test_posx             = 0        # output data of cells with these indices in runlog file
+nyx.test_posy             = 0
+nyx.test_posz             = 0
+
+# DIAGNOSTICS & VERBOSITY
+nyx.v                     = 0        # verbosity in Castro.cpp
+amr.v                     = 0        # verbosity in Amr.cpp
+amr.grid_log              = grdlog   # name of grid logging file
+
+# REFINEMENT / REGRIDDING
+amr.max_level             = 3        # maximum level number allowed
+amr.ref_ratio             = 2 2 2 2 2
+amr.regrid_int            = 1 2 4 8
+amr.n_error_buf           = 1
+#amr.refine_grid_layout   = 1
+amr.regrid_on_restart     = 1
+amr.subcycling_mode       = Manual
+amr.subcycling_iterations = 2
+amr.grid_eff              = 0.99
+amr.n_proper              = 1
+
+amr.refinement_indicators = string string1 string2 grad densgrad
+
+amr.string.value_greater  = 0.99
+amr.string.field_name     = axion_string
+amr.string.max_level      = 1
+amr.string.start_time     = 30
+amr.string.end_time       = 256  
+
+amr.string1.value_greater = 0.99
+amr.string1.field_name    = axion_string
+amr.string1.max_level     = 2
+amr.string1.start_time    = 75
+amr.string1.end_time      = 256
+
+amr.string2.value_greater = 0.99
+amr.string2.field_name    = axion_string
+amr.string2.max_level     = 3
+amr.string2.start_time    = 120
+amr.string2.end_time      = 256
+
+amr.grad.value_greater  = 0.04
+amr.grad.field_name     = axion_gradients
+amr.grad.max_level      = 1
+amr.grad.start_time     = 0
+amr.grad.end_time       = 128
+
+amr.densgrad.value_greater  = 4.0
+amr.densgrad.field_name     = axion_dens_gradient
+amr.densgrad.max_level      = 1
+amr.densgrad.start_time     = 0
+amr.densgrad.end_time       = 128
+
+
+# CHECKPOINT FILES
+amr.check_file            = chk
+amr.check_int             = 100
+
+# PLOTFILES
+amr.plot_file             = plt
+amr.plot_int              = 100
+
+#LOG FILE nstep | time | dt | redshift | a
+amr.data_log = runlog
+
+#amr.derive_plot_vars = AxRe AxIm # these variables appear in the plotfile
+amr.plot_vars = AxRe AxIm AxvRe AxvIm
+
+
+#DON'T TOUCH THESE PARAMETERS
+
+nyx.comoving_OmB = 0.0
+nyx.comoving_OmM = 1.0
+nyx.comoving_h = 0.0
+nyx.initial_z = 0.0
+nyx.do_dm_particles = 0
+nyx.particle_init_type = bla
+nyx.particle_move_type = Gravitational
+amr.probin_file = ""
+particles.v = 0
+nyx.sum_interval = 1
+nyx.cfl = 0.5
+nyx.init_shrink = 1.0
+nyx.dt_cutoff  = 5.e-20
+nyx.lo_bc = 0 0 0
+nyx.hi_bc = 0 0 0
+

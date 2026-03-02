@@ -1,0 +1,10 @@
+# Directory structure of Axionyx_KG
+
+* Main: Contains ax_main.cpp and main.cpp (the main program loops) and AxBld.cpp, the LevelBld derived class that tells Axionyx_KG which implementation to deploy. *Add your ifdef here to select the physics you want to run!*
+* Base: Contains the abstract base classes
+* Impl: Contains the implementations of the abstract base classes
+* Gravity: Contains the gravity-specific code
+* Particle: Contains the particle-specific code
+* Utils: Contains helper functions for various parts of the code
+* IO: Contains input/output-related code
+* Timestep: Contains the code related to advancing fields and particles in time

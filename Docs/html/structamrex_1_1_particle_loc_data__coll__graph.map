@@ -1,0 +1,5 @@
+<map id="amrex::ParticleLocData" name="amrex::ParticleLocData">
+<area shape="rect" id="node1" title="A struct used for storing a particle&#39;s position in the AMR hierarchy." alt="" coords="67,127,226,153"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_int_vect.html" title=" " alt="" coords="5,7,112,33"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_box.html" title="A Rectangular Domain on an Integer Lattice." alt="" coords="190,7,279,33"/>
+</map>

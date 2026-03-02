@@ -1,0 +1,11 @@
+###########
+# Sources #
+###########
+
+CEXE_sources += AxBld.cpp ax_main.cpp main.cpp 
+
+###########
+# Headers #
+###########
+
+# N/A

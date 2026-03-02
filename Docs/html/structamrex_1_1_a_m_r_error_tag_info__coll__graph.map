@@ -1,0 +1,5 @@
+<map id="amrex::AMRErrorTagInfo" name="amrex::AMRErrorTagInfo">
+<area shape="rect" id="node1" title=" " alt="" coords="5,109,172,136"/>
+<area shape="rect" id="node2" title=" " alt="" coords="9,5,59,32"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_real_box.html" title="A Box with real dimensions. A RealBox is OK iff volume &gt;= 0." alt="" coords="87,5,203,32"/>
+</map>

@@ -1,0 +1,111 @@
+# ------------------  INPUTS TO MAIN PROGRAM  -------------------
+
+# New KG Axioax inputs  --PH
+# ####################### #
+# AXIONYX PARAMETERS      #
+# ####################### #
+
+KG.simType                = 0           # Single Field Quartic 
+KG.ICType                 = 3           # 0 = uniform, 1 = fixed_k, 2 = delta_k (i.e., fixed_k in momentum space), 3 = standard 
+KG.KG_k                   = 2           # 
+# KG.mass                   = 1.e-7       # As per the LatticeEasy ONEFLDLAMBDA model.
+KG.mass                   = 0.03        # 
+KG.lambda                 = 0.          # As per the LatticeEasy ONEFLDLAMBDA model.
+# KG.lambda                 = 9.e-14    # As per the LatticeEasy ONEFLDLAMBDA model.
+# KG.KG0                    = 0.342       # As per the LatticeEasy ONEFLDLAMBDA model.
+KG.KG0                    = 0.6       # As per the LatticeEasy ONEFLDLAMBDA model.
+# KG.beta                   = 4           # As per the LatticeEasy ONEFLDLAMBDA model.
+
+# ####################### #
+# NYX PARAMETERS          #
+# ####################### #
+
+# ## End condition
+max_step                 = 40000          # Maximum number of level 0 steps 
+# stop_time                 = 200.0      # Final simulation time
+# ax.final_a                           # Final value of a
+# ax.final_z                           # Final value of z
+
+# ## Integration methods
+# ax.levelmethod           = 0 0 0 0   # which method to use 3=spectral, 0=finite_difference
+# ax.order                 = 2         # nth order spectral method 2 or 6
+ax.interpolator          = 1           # 1 = bilinear interpolation , 2 = quartic interpolation
+
+# ## Diagnostics & verbosity
+ax.v                     = 0           # Verbosity ranges from 0 (least) to 3 (most)
+particles.v = 0                         # TODO
+
+# ## Nyx physics 
+# ax.comoving_OmB = 0.0                  # Omega_baryon --- baryon fractional energy density.
+# ax.comoving_OmM = 1.0                  # Omega_matter --- total matter fractional energy density. (i.e., pure matter)
+# ax.comoving_OmR = 0.0                  # Omega_radiation --- total radiation fractional energy density. 
+# ax.comoving_h = 0.0                    # This is H_0/(100 km/s/Mpc). h = 0 switches off evolution of the scale factor
+# ax.initial_z = 0.0                     # Initial redshift  ## NECESSARY
+# ax.do_dm_particles = 0                 # TODO
+# ax.particle_init_type = bla            # Nonsense value, switches off DM particles.
+# ax.particle_move_type = Gravitational  # Irrelevant since particles are switched off.
+# ax.sum_interval = 1                    # TODO
+# ax.cfl = 0.5                           # CFL is something to do with the hydro equations, which I'll remove
+# ax.init_shrink = 1.0                   # TODO
+ax.dt_cutoff  = 5.e-23                 # Time step below which calculation will abort   ## NECESSARY
+ax.lo_bc = 0 0 0                       # Boundary types: 0 = interior/periodic, 1 = inflow, 2 = outflow, 3 = symmetry
+ax.hi_bc = 0 0 0                       #                 4 = slip wall, 5 = no-slip wall. We'll only use 0.
+# ax.fixed_dt = 1.62e-21                     # Converting Nyx time, T_UNIT = 3.0856776e19
+ax.fixed_dt = 0.005                     # As per LatticeEasy ONEFLDLAMBDA example
+                                        # Use a fixed time-step. I might make this the only one in Axioax_KG 
+                                        # For more, see https://amrex-astro.github.io/Nyx/docs_html/NyxInputs.html#regridding
+ 
+# ####################### #
+# AMREX PARAMETERS        #
+# ####################### #
+
+# If restarting from a checkpoint, specify the checkpoint.
+# amr.restart               = ./chk02000
+
+# ## Problem size & geometry
+geometry.is_periodic      = 1 1 1            # Periodic = 1; Fixed = 0
+geometry.coord_sys        = 0                # Cartesian = 0
+geometry.prob_lo          = 0.0 0.0 0.0      # Physical location of lower corner of domain (in MPc)
+# geometry.prob_hi          = 1.0 1.0 1.0    # Physical location of upper corner of domain (in MPc) 
+geometry.prob_hi          = 20 20 20         # Physical location of upper corner of domain (in MPc) 
+# amr.n_cell                = 8 8 8         # Number of cells in x y z
+amr.n_cell                = 64 64 64         # Number of cells in x y z
+amr.max_grid_size         = 32               # Max number of cells in a grid (used for parallelizing)
+amr.blocking_factor       = 1                # Dimension of grids is a multiple of this. Can have one for each level
+
+# ## Diagnostics & verbosity
+amr.v                     = 0                # Verbosity ranges from 0 (least) to 3 (most)
+amr.grid_log              = grdlog           # Name of grid logging file
+
+# ## Refinement / regridding (Not used in KG yet)
+amr.max_level             = 0                # Maximum refinement level number allowed
+amr.ref_ratio             = 2 2 2 2 2        # Refinement ratio between levels (0->1) (1->2) (2->3) etc.
+amr.regrid_int            = 1 2 4 8          # When to re-grid per level (0 1 2 etc.)
+amr.n_error_buf           = 2                # TODO
+#amr.refine_grid_layout   = 1                # TODO
+amr.regrid_on_restart     = 1                # TODO
+amr.subcycling_mode       = Manual           # TODO
+amr.subcycling_iterations = 2                # TODO
+amr.grid_eff              = 0.8              # TODO
+amr.n_proper              = 0                # TODO
+# amr.refinement_indicators = string         # The interesting areas to focus computational power (E.g., clusters)
+
+# ## Checkpoint files
+amr.check_file            = chk              # The prefix of checkpoint folder names
+amr.check_int             = 2000              # The interval of steps at which to save checkpoints
+
+# ## Plotfiles
+amr.plot_file             = plt              # The prefix of plot folder names
+amr.plot_int              = 2000               # The interval of steps at which to save plots 
+# amr.plot_int              = 5               # The interval of steps at which to save plots 
+
+# ## Log file 
+amr.data_log = runlog                        # The name of the run log
+
+# ## Output field names
+amr.derive_plot_vars = KGf KGfv              # Derived fields output in plot folders/checkpoints 
+amr.plot_vars = KGfpr KGfVpr                 # Primitive fields output in plot folders/checkpoints
+
+# ## Other
+amr.probin_file = ""                         # TODO
+

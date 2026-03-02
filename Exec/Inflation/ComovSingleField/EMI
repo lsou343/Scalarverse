@@ -1,0 +1,111 @@
+
+# ------------------  INPUTS TO MAIN PROGRAM  -------------------
+
+# If restarting from a checkpoint, specify the checkpoint.
+# amr.restart               = Outputs/chk00000
+
+
+# New KG Axioax inputs  --PH
+# ####################### #
+# AXIONYX PARAMETERS      #
+# ####################### #
+
+KG.simType                = 4           # E-model inflation
+KG.ICType                 = 3           # 0 = uniform, 1 = fixed_k, 2 = delta_k (i.e., fixed_k in momentum space), 3 = standard 
+KG.KG_k                   = 2           # LSR -- maybe try 2
+KG.cutoff_k               = 0           # and 0
+KG.mass                   = 2.217e-06   # As per the LatticeEasy E-model. Needs tweaking.
+KG.alpha                  = 1.e-5       # As per the LatticeEasy E-model.
+KG.n_pow                  = 1           # As per the LatticeEasy E-model.
+# KG.KG0                    = 0.342052       # As per the LatticeEasy E-model.
+KG.KG0                    = .0211536787 # As per the LatticeEasy E-model. Needs tweaking.
+# KG.beta                   = 2           # As per the LatticeEasy E-model.
+
+# ####################### #
+# NYX PARAMETERS          #
+# ####################### #
+
+# ## End condition
+# max_step                 = 1000          # Maximum number of level 0 steps 
+stop_time                 = 150.0      # Final simulation time
+# comov.final_a               = 1.05188 # this will abort the simulation if final_a is reached before stop_time or max_step
+# comov.final_efold       = 0.03
+
+# ## Integration methods
+ax.interpolator          = 1           # 1 = bilinear interpolation , 2 = quartic interpolation
+
+# ## Diagnostics & verbosity
+ax.v                     = 3           # Verbosity ranges from 0 (least) to 3 (most)
+#particles.v              = 0          # No particles yet
+
+# ## Axionyx physics 
+ax.dt_cutoff  = 5.e-23                 # Time step below which calculation will abort   ## NECESSARY
+ax.lo_bc = 0 0 0                       # Boundary types: 0 = interior/periodic, 1 = inflow, 2 = outflow, 3 = symmetry
+ax.hi_bc = 0 0 0                       #                 4 = slip wall, 5 = no-slip wall. We'll only use 0.
+# ax.fixed_dt = 1.62e-21                     # Converting Nyx time, T_UNIT = 3.0856776e19
+ax.fixed_dt = 0.05                     # As per LatticeEasy ONEFLDLAMBDA example
+                                        # Use a fixed time-step. I might make this the only one in Axioax_KG 
+                                        # For more, see https://amrex-astro.github.io/Nyx/docs_html/NyxInputs.html#regridding
+ 
+# ####################### #
+# AMREX PARAMETERS        #
+# ####################### #
+
+# ## Problem size & geometry
+geometry.is_periodic      = 1 1 1            # Periodic = 1; Fixed = 0
+geometry.coord_sys        = 0                # Cartesian = 0
+geometry.prob_lo          = 0.0 0.0 0.0      # Physical location of lower corner of domain (in code units)
+geometry.prob_hi          = 20 20 20         # Physical location of upper corner of domain (in code units) 
+amr.n_cell                = 128 128 128         # Number of cells in x y z
+amr.max_grid_size         = 128               # Max number of cells in a grid (used for parallelizing)
+amr.blocking_factor       = 32                # Dimension of grids is a multiple of this. Can have one for each level	# LSR -- don't know what this is -32 for inputs_*
+
+# ## Diagnostics & verbosity
+amr.v                     = 0                # Verbosity ranges from 0 (least) to 3 (most)
+
+# ## Refinement / regridding (Not used in KG yet)
+amr.max_level             = 0                # Maximum refinement level number allowed
+amr.ref_ratio             = 2 2 2 2 2        # Refinement ratio between levels (0->1) (1->2) (2->3) etc.
+amr.regrid_int            = 2 2 4 8          # When to re-grid per level (0 1 2 etc.)		# LSR -- 2 2 4 8 for inputs_test
+amr.n_error_buf           = 10                # "Buffer" cells to include around refined grid
+#amr.refine_grid_layout   = 1                # True (1) or False (0), add more grids until number of 
+                                             # grids == number of processors
+amr.regrid_on_restart     = 1                # Whether or not to regrid (update refinement) on restart
+amr.subcycling_mode       = None           # Auto, None, or Manual --- subcycling is taking more time 
+                                             # steps in refined layers
+amr.subcycling_iterations = 1           
+                                             # as it is the reference layer)
+amr.grid_eff              = 0.95              # At grid creation (refinement), fraction of grid cells that 
+                                             # must contain tagged cells
+#amr.n_proper              = 0                # "Cells required for proper nesting"
+
+## Specific to Sim
+amr.refinement_indicators = EdensRel         # The interesting areas to focus computational power (E.g., clusters)
+amr.EdensRel.value_greater  = 1.3 
+amr.EdensRel.field_name     = EdensRel
+amr.EdensRel.max_level      = 1
+amr.EdensRel.start_time     = 2.5
+# amr.EdensRel.end_time       = 256  
+
+# ## Checkpoint files
+amr.check_file            = Outputs/chk              # The prefix of checkpoint folder names
+amr.check_int             = 50              # The interval of steps at which to save checkpoints
+
+# ## Plotfiles
+amr.plot_file             = Outputs/plt              # The prefix of plot folder names
+amr.plot_int              = 50               # The interval of steps at which to save plots 
+
+# ## Log file 
+amr.data_log = Outputs/runlog                        
+amr.grid_log = Outputs/grdlog           
+
+# ## Output field names
+amr.plot_vars = KGfpr KGfVpr                 # Primitive fields output in plot folders/checkpoints
+                                             # KGfpr and KGfVpr are the field and time-derivative in program units
+amr.derive_plot_vars = KGf KGfv KGfdens Edens           # Derived fields output in plot folders/checkpoints 
+                                             # Options are: KGf, KGfv (field and time-dv in Natural units), 
+                                             # KGfdens (field^2 in Natural units), and Edens (energy density in Natural units)
+
+# ## Other
+amr.probin_file = ""                         # TODO
+

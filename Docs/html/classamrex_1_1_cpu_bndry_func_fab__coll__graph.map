@@ -1,0 +1,4 @@
+<map id="amrex::CpuBndryFuncFab" name="amrex::CpuBndryFuncFab">
+<area shape="rect" id="node1" title="This cpu version calls function working on FArrayBox." alt="" coords="5,95,180,121"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_box.html" title="A Rectangular Domain on an Integer Lattice." alt="" coords="48,5,137,32"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="amrex::GeometryData" name="amrex::GeometryData">
+<area shape="rect" id="node1" title=" " alt="" coords="115,95,265,121"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_real_box.html" title="A Box with real dimensions. A RealBox is OK iff volume &gt;= 0." alt="" coords="5,5,121,32"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_box.html" title="A Rectangular Domain on an Integer Lattice." alt="" coords="145,5,235,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="259,5,308,32"/>
+</map>

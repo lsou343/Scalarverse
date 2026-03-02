@@ -1,0 +1,7 @@
+<map id="amrex::TagBox" name="amrex::TagBox">
+<area shape="rect" id="node1" title=" " alt="" coords="33,336,144,363"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_base_fab.html" title=" " alt="" coords="5,260,172,287"/>
+<area shape="rect" id="node3" href="$structamrex_1_1_data_allocator.html" title=" " alt="" coords="16,184,161,211"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_arena.html" title="A virtual base class for objects that manage their own dynamic memory allocation." alt="" coords="39,95,139,121"/>
+<area shape="rect" id="node5" href="$structamrex_1_1_arena_info.html" title=" " alt="" coords="27,5,150,32"/>
+</map>

@@ -1,0 +1,40 @@
+###########
+# Sources #
+###########
+
+ifeq ($(USE_COMOV_FULL), TRUE)
+  CEXE_sources += Comoving_Full.cpp
+endif
+
+ifeq ($(USE_COMOV_EOS), TRUE)
+  CEXE_sources += Comoving_EOS.cpp
+endif
+
+ifeq ($(USE_GRAV), TRUE)
+  ifeq ($(USE_NEWT), TRUE)	# LSR -- Using the Newtonian gauge in the EoM
+    CEXE_sources += Newtonian.cpp
+  else
+    CEXE_sources += Gravity.cpp
+  endif
+endif
+
+###########
+# Headers #
+###########
+
+ifeq ($(USE_COMOV_FULL), TRUE)
+  CEXE_headers += Comoving_Full.H
+endif
+
+ifeq ($(USE_COMOV_EOS), TRUE)
+  CEXE_headers += Comoving_EOS.H
+endif
+
+ifeq ($(USE_GRAV), TRUE)
+  ifeq ($(USE_NEWT), TRUE)	# LSR -- Using the Newtonian gauge in the EoM
+    CEXE_headers += Newtonian.H
+  else
+    CEXE_headers += Gravity.H
+  endif
+endif
+

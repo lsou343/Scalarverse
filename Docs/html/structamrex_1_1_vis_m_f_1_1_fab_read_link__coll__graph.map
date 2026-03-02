@@ -1,0 +1,4 @@
+<map id="amrex::VisMF::FabReadLink" name="amrex::VisMF::FabReadLink">
+<area shape="rect" id="node1" title="This structure is used to store the read order for each FabArray file." alt="" coords="5,95,195,121"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_box.html" title="A Rectangular Domain on an Integer Lattice." alt="" coords="55,5,145,32"/>
+</map>

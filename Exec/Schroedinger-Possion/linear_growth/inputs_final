@@ -1,0 +1,174 @@
+# ------------------  INPUTS TO MAIN PROGRAM  -------------------
+
+# ## End condition
+max_step                 = 100000 
+# max_step =    1
+# stop_time                 = 100      # Final simulation time
+
+# ####################### #
+# AXIONYX PARAMETERS      #
+# ####################### #
+#
+# ## Gravity inputs 
+# gravity.Gconst = 1.0e-10 # Gravitational constant but in programing units (m_u*t_u^2/l_u^3) look at paper Eggemeier, Hayman 2024
+gravity.Gconst = 4.3009271605043905e-09 #cm^3 g^-1 s^-2
+
+gravity.ml_tol = 1.e-10                 # Query multilevel tolerance
+gravity.sl_tol = 1.e-10                 # Query single-level tolerance
+gravity.delta_tol = 1.e-10              # Query delta tolerance
+# gravity.gravity_type = PoissonGrav      #
+gravity.no_sync      = 1                # Query no_sync flag
+gravity.no_composite = 1                # Query no_composite flag
+# gravity.show_timings = 1 
+
+#mg.bottom_solver = 4
+mg.bottom_solver = 1                    # Query bottom solver type
+
+# ----------- COSMOLOGY --------------------
+nyx.comoving_OmM = 1.0
+nyx.comoving_OmB = 0.0
+nyx.comoving_h = 0.7
+
+# nyx.initial_z = 0.0001 
+nyx.initial_z = 99.0
+nyx.final_z = 0.0
+# timestepping for comoving eos
+nyx.relative_max_change_a = 0.01    # max change in scale factor
+
+SCH.test_factor = 1.0  # can be deleted after code is debuged.
+
+SCH.ICType                 = 4          # 0 = test , 1 = plain wave, 2 = gaussian, 3 = KGfield, 4 = linearperturbation
+SCH.PSorFD                = 1     # 0 = PS, 1 = FD  (Descision only works for the root level, since PS cant be used for refinement yet)
+SCH.PSorder              = 2          # 2 or 6 order of pseudo spectral method
+SCH.vonNeumann_dt             = 100.0        # von Neumann stability factor, should be set to 1.
+SCH.mtt                   = 1.0         # FDM mass in 10⁻22 eV, use 1.0 if using hbaroverm 6.582119569e-16 eV s
+# SCH.hbaroverm             = 0.01917152 #6.582119569e-16 # hbar/m in eV s
+SCH.hbaroverm             = 0.007668608 #hbar/m in eV s
+# SCH.hbaroverm             = 0.00014178586225472073 # in l_u^2/t_u
+
+# if initialized from plain wave or gaussian
+SCH.SCH_k0                 = 1           # Initial k mode  
+SCH.Phase0                = 0.0         # Initial phase of the field
+SCH.SCH0                    = 1.0e3 # Initial amplitude of the field
+# SCH.sigma                 = 0.1         # Width of the gaussian profile
+# if initialized from KG field
+# KG.KGinitDirName = /scratch-scc/projects/mthesis_niki_suckau/scalarverse/Exec/Inflation/ComovSingleField/Output_64_M0.05_a0.5/plt00000
+# KG.KGinitDirName = /scratch-scc/projects/mthesis_niki_suckau/scalarverse/Exec/Inflation/ComovSingleField/Output_256_M0.05_a0.5_2/plt700000
+# KG.KGm = 1.4002212706340354e-05  # in units of Planck mass (m_pl, not the reduced Planck mass)
+# KG.KGA = 6.649758554848538 # in 1/m_pl 
+# KG.KGB = 3.605991065686597e-06 # in m_pl
+# KG.KGr = 2.0 # dimless
+# KG.KGs = 1.0 # dimless
+#
+# ####################### #
+# NYX PARAMETERS          #
+# ####################### #
+
+# ax.final_a                           # Final value of a
+# ax.final_z                           # Final value of z
+
+# ## Integration methods
+# ax.levelmethod           = 0 0 0 0   # which method to use 3=spectral, 0=finite_difference
+# ax.order                 = 2         # nth order spectral method 2 or 6
+# ax.interpolator          = 1           # 1 = bilinear interpolation , 2 = quartic interpolation
+
+# ## Diagnostics & verbosity
+ax.v                     = 0           # Verbosity ranges from 0 (least) to 3 (most)
+gravity.v                = 0
+
+# particles.v = 0                         # TODO
+
+
+# ## Nyx physics 
+# ax.do_dm_particles = 0                 # TODO
+# ax.particle_init_type = bla            # Nonsense value, switches off DM particles.
+# ax.particle_move_type = Gravitational  # Irrelevant since particles are switched off.
+# ax.sum_interval = 1                    # TODO
+# ax.cfl = 0.5                           # CFL is something to do with the hydro equations, which I'll remove
+# ax.init_shrink = 1.0                   # TODO
+ax.change_max            = 1.05          # factor by which timestep can change (Comment out for KG)
+ax.dt_cutoff  = 5.e-20                 # Time step below which calculation will abort   ## NECESSARY
+ax.lo_bc = 0 0 0                       # Boundary types: 0 = interior/periodic, 1 = inflow, 2 = outflow, 3 = symmetry
+ax.hi_bc = 0 0 0                       #                 4 = slip wall, 5 = no-slip wall. We'll only use 0.
+# ax.fixed_dt = 1.0e-8                     # As per LatticeEasy ONEFLDLAMBDA example
+                                        # Use a fixed time-step. I might make this the only one in Axioax_KG 
+                                        # For more, see https://amrex-astro.github.io/Nyx/docs_html/NyxInputs.html#regridding
+ax.initial_dt = 1.0e-7                  
+ 
+# ####################### #
+# AMREX PARAMETERS        #
+# ####################### #
+
+# If restarting from a checkpoint, specify the checkpoint.
+# amr.restart               = ./chk00100
+
+# ## Problem size & geometry
+geometry.is_periodic      = 1 1 1            # Periodic = 1; Fixed = 0
+geometry.coord_sys        = 0                # Cartesian = 0
+geometry.prob_lo          = 0.0 0.0 0.0      # Physical location of lower corner of domain (in MPc)
+geometry.prob_hi          = 0.08 0.08 0.08       # Physical location of upper corner of domain (in MPc) 
+amr.n_cell                = 64 64 64         # Number of cells in x y z
+amr.max_grid_size         = 16 # Max number of cells in a grid (used for parallelizing)
+amr.blocking_factor       = 16 # Dimension of grids is a multiple of this. Can have one for each level
+
+
+# ## Diagnostics & verbosity
+amr.v                     = 0                # Verbosity ranges from 0 (least) to 3 (most)
+# amr.grid_log              = Output/grdlog           # Name of grid logging fileamr
+# amr.grid_log              = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse_gaussian/Output/grdlog           # Name of grid logging fileamr
+
+# ## Refinement / regridding (Not used in KG yet)
+amr.max_level             = 0                # Maximum refinement level number allowed
+# amr.ref_ratio             = 2 2 2 2 2        # Refinement ratio between levels (0->1) (1->2) (2->3) etc.
+# amr.regrid_int            = 1 2 4 8          # When to re-grid per level (0 1 2 etc.)
+amr.n_error_buf           = 2                # TODO
+#amr.refine_grid_layout   = 1                # TODO
+amr.regrid_on_restart     = 1                # TODO
+amr.subcycling_mode       = Manual           # TODO
+amr.subcycling_iterations = 1 2 2 2 2 2 2 2 2 2 2 2 2 2     # TODO
+amr.grid_eff              = 0.7              # TODO
+amr.n_proper              = 1                # TODO
+# amr.refinement_indicators = string         # The interesting areas to focus computational power (E.g., clusters)
+# amr.refinement_indicators = dens1 dens2 dens3
+amr.refinement_indicators = dens1 
+amr.dens1.field_name = Dens
+amr.dens1.value_greater = 1.0 
+amr.dens1.max_level = 1
+
+# amr.dens1.field_name = AxDens
+# amr.dens1.value_greater = 2.968e10 # corresponding to 5*mean_dens
+# amr.dens1.max_level = 1
+#
+# amr.dens2.field_name = AxDens
+# amr.dens2.value_greater =  5.936e10 # corresponding to 10*mean_dens
+# amr.dens2.max_level = 2
+#
+# amr.dens3.field_name = AxDens
+# amr.dens3.value_greater = 1.187e11 # corresponding to 20*mean_dens
+# amr.dens3.max_level = 3
+
+# ## Checkpoint files
+# amr.check_file            = Output/chk              # The prefix of checkpoint folder names
+# amr.check_file           = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse_gaussian/Output/chk              # The prefix of checkpoint folder names
+amr.check_int             = 100000              # The interval of steps at which to save checkpoints
+
+# ## Plotfiles
+# amr.plot_file             = Output/plt              # The prefix of plot folder names
+# amr.plot_file            = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse_gaussian/Output/plt              # The prefix of plot folder names
+amr.plot_int              = 100000               # The interval of steps at which to save plots 
+
+# ## Log file 
+# amr.data_log = Output/runlog                        # The name of the run log
+# amr.data_log = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse_gaussian/Output/runlog                        # The name of the run log
+
+# ## Output field names
+amr.plot_vars = SCHf_Re SCHf_Im Dens Phase phi_grav                 # Primitive fields output in plot folders/checkpoints
+# amr.derive_plot_vars = SCHf_Re SCHf_Im #SCHf SCHfv SCHfdens             # Derived fields output in plot folders/checkpoints 
+
+# ## Other
+amr.probin_file = ""                         # TODO
+
+amr.grid_log = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse/SP/Linearpertur/FD/medium/grdlog
+amr.check_file = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse/SP/Linearpertur/FD/medium/chk
+amr.plot_file  = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse/SP/Linearpertur/FD/medium/plt
+amr.data_log   = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse/SP/Linearpertur/FD/medium/runlog

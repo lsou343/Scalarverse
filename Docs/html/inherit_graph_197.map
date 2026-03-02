@@ -1,0 +1,12 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classamrex_1_1_interpolater.html" title="Virtual base class for interpolaters." alt="" coords="5,183,136,209"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_cell_bilinear.html" title="Bilinear interpolation on cell centered data." alt="" coords="229,5,361,32"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_cell_conservative_linear.html" title="Linear conservative interpolation on cell centered data." alt="" coords="195,56,396,83"/>
+<area shape="rect" id="node5" href="$classamrex_1_1_cell_conservative_protected.html" title="Lin. cons. interp. on cc data with protection against under/over&#45;shoots." alt="" coords="184,107,407,133"/>
+<area shape="rect" id="node6" href="$classamrex_1_1_cell_conservative_quartic.html" title="Conservative quartic interpolation on cell averaged data." alt="" coords="191,157,399,184"/>
+<area shape="rect" id="node7" href="$classamrex_1_1_cell_quadratic.html" title="Quadratic interpolation on cell centered data." alt="" coords="223,208,368,235"/>
+<area shape="rect" id="node8" href="$classamrex_1_1_face_linear.html" title="Bilinear interpolation on face data." alt="" coords="230,259,361,285"/>
+<area shape="rect" id="node9" href="$classamrex_1_1_node_bilinear.html" title="Bilinear interpolation on node centered data." alt="" coords="225,309,365,336"/>
+<area shape="rect" id="node10" href="$classamrex_1_1_p_c_interp.html" title="Piecewise Constant interpolation on cell centered data." alt="" coords="236,360,355,387"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_e_b_cell_conservative_linear.html" title=" " alt="" coords="455,49,639,90"/>
+</map>

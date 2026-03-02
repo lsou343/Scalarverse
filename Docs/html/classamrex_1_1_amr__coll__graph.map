@@ -1,0 +1,10 @@
+<map id="amrex::Amr" name="amrex::Amr">
+<area shape="rect" id="node1" title="Manage hierarchy of levels for time&#45;dependent AMR computations." alt="" coords="187,573,278,600"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_amr_core.html" title="Provide basic functionalities to set up an AMR hierarchy." alt="" coords="91,367,209,393"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_amr_mesh.html" title=" " alt="" coords="134,231,257,257"/>
+<area shape="rect" id="node4" href="$structamrex_1_1_amr_info.html" title=" " alt="" coords="93,95,205,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="5,5,55,32"/>
+<area shape="rect" id="node6" title=" " alt="" coords="233,367,288,393"/>
+<area shape="rect" id="node7" title=" " alt="" coords="340,367,413,393"/>
+<area shape="rect" id="node8" href="$classamrex_1_1_level_bld.html" title="Builds problem&#45;specific AmrLevels." alt="" coords="437,367,553,393"/>
+</map>

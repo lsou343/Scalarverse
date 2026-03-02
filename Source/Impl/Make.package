@@ -1,0 +1,76 @@
+###########
+# Sources #
+###########
+
+ifeq ($(USE_INFLATION), TRUE)
+  CEXE_sources += AxKG.cpp
+    ifeq ($(USE_COMOV_FULL), TRUE)
+      CEXE_sources += AxKGComov.cpp
+    endif
+endif
+
+ifeq ($(USE_SCHROEDINGER), TRUE)
+  CEXE_sources += AxSCH.cpp
+  ifeq ($(USE_COMOV_EOS),TRUE)
+    ifeq ($(USE_GRAV), TRUE)
+      CEXE_sources += AxSP.cpp
+    endif
+    CEXE_sources += AxSCHComov.cpp
+  endif
+endif
+
+#ifeq ($(USE_GRAV), TRUE)
+#  ifeq ($(USE_SCHROEDINGER), FALSE)
+#    CEXE_sources += AxTestGrav.cpp
+#  endif
+#endif
+
+ifeq ($(USE_GRAV), TRUE)
+  ifeq ($(USE_SCHROEDINGER), FALSE)
+    ifeq ($(USE_NEWT), TRUE)
+      CEXE_sources += AxNewt.cpp
+    else
+      CEXE_sources += AxTestGrav.cpp
+    endif
+  endif
+endif
+
+###########
+# Headers #
+###########
+
+ifeq ($(USE_INFLATION), TRUE)
+  CEXE_headers += AxKG.H
+    ifeq ($(USE_COMOV_FULL), TRUE)
+      CEXE_headers += AxKGComov.H
+    endif
+endif
+
+ifeq ($(USE_SCHROEDINGER), TRUE)
+  CEXE_headers += AxSCH.H
+  ifeq ($(USE_COMOV_EOS),TRUE)
+    ifeq ($(USE_GRAV), TRUE)
+      CEXE_headers += AxSP.H
+    endif
+    CEXE_headers += AxSCHComov.H
+  endif
+endif
+
+#ifeq ($(USE_GRAV), TRUE)
+#  ifeq ($(USE_SCHROEDINGER), FALSE)
+#    CEXE_headers += AxTestGrav.H
+#  endif
+#endif
+
+ifeq ($(USE_GRAV), TRUE)
+  ifeq ($(USE_SCHROEDINGER), FALSE)
+    ifeq ($(USE_NEWT), TRUE)
+      CEXE_headers += AxNewt.H
+    else
+      CEXE_headers += AxTestGrav.H
+    endif
+  endif
+endif
+
+
+

@@ -1,0 +1,2 @@
+CEXE_headers += NyxParticleContainer.H
+CEXE_headers += DarkMatterParticleContainer.H

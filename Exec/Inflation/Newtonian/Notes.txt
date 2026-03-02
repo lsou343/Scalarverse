@@ -1,0 +1,13 @@
+WIP
+
+Currently nothing much here - have begun to set up the structures needed but can't make progress until the KGE solver is working.
+
+I don't know what resonance.job does
+
+Things to do:
+1. Figure out how the Poisson solver works.
+2. Set up an initial grid of phi (field) and Phi (Newtonian potential) based on phi. 
+3. Use existing KG EoM and compute gravity as it runs. See how big the potential is.
+4. Figure out staggered leapfrog - can we use it? Or do we need something else?
+5. Test test test.
+

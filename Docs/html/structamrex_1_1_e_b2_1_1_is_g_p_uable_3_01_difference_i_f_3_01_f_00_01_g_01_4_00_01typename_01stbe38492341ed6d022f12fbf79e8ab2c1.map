@@ -1,0 +1,4 @@
+<map id="amrex::EB2::IsGPUable&lt; DifferenceIF&lt; F, G &gt;, typename std::enable_if&lt; IsGPUable&lt; F &gt;::value &amp;&amp;IsGPUable&lt; G &gt;::value &gt;::type &gt;" name="amrex::EB2::IsGPUable&lt; DifferenceIF&lt; F, G &gt;, typename std::enable_if&lt; IsGPUable&lt; F &gt;::value &amp;&amp;IsGPUable&lt; G &gt;::value &gt;::type &gt;">
+<area shape="rect" id="node1" title=" " alt="" coords="5,80,199,180"/>
+<area shape="rect" id="node2" title=" " alt="" coords="51,5,153,32"/>
+</map>

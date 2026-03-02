@@ -1,0 +1,18 @@
+<map id="amrex::AmrLevel" name="amrex::AmrLevel">
+<area shape="rect" id="node1" title="Virtual base class for managing individual levels. AmrLevel functions both as a container for state d..." alt="" coords="1211,420,1332,447"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_geometry.html" title=" " alt="" coords="469,5,592,32"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_coord_sys.html" title="Coordinate System." alt="" coords="149,39,273,65"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,156,55,183"/>
+<area shape="rect" id="node6" href="$classamrex_1_1_amr.html" title="Manage hierarchy of levels for time&#45;dependent AMR computations." alt="" coords="941,265,1032,292"/>
+<area shape="rect" id="node9" href="$structamrex_1_1_amr_info.html" title=" " alt="" coords="155,209,267,236"/>
+<area shape="rect" id="node5" href="$classamrex_1_1_distribution_mapping.html" title="Calculates the distribution of FABs to MPI processes." alt="" coords="896,316,1077,343"/>
+<area shape="rect" id="node7" href="$classamrex_1_1_amr_core.html" title="Provide basic functionalities to set up an AMR hierarchy." alt="" coords="616,209,735,236"/>
+<area shape="rect" id="node8" href="$classamrex_1_1_amr_mesh.html" title=" " alt="" coords="323,217,445,244"/>
+<area shape="rect" id="node10" title=" " alt="" coords="648,341,703,368"/>
+<area shape="rect" id="node11" title=" " alt="" coords="639,416,712,443"/>
+<area shape="rect" id="node12" href="$classamrex_1_1_level_bld.html" title="Builds problem&#45;specific AmrLevels." alt="" coords="617,467,733,493"/>
+<area shape="rect" id="node13" href="$classamrex_1_1_int_vect.html" title=" " alt="" coords="933,420,1040,447"/>
+<area shape="rect" id="node14" href="$classamrex_1_1_derive_list.html" title="A list of DeriveRecs." alt="" coords="924,471,1049,497"/>
+<area shape="rect" id="node15" href="$classamrex_1_1_descriptor_list.html" title=" " alt="" coords="913,521,1060,548"/>
+<area shape="rect" id="node16" href="$classamrex_1_1_box.html" title="A Rectangular Domain on an Integer Lattice." alt="" coords="942,572,1031,599"/>
+</map>

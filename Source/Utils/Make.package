@@ -1,0 +1,20 @@
+###########
+# Sources #
+###########
+
+# ifeq ($(USE_MPI), TRUE)
+# CEXE_sources += DFFTUtils.cpp
+# endif
+
+CEXE_sources += bc_fill.cpp 
+
+###########
+# Headers #
+###########
+
+# ifeq ($(USE_MPI), TRUE)
+# CEXE_headers += DFFTUtils.H
+# endif
+
+CEXE_headers += bc_fill.H
+

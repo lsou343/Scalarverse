@@ -1,0 +1,4 @@
+<map id="amrex::ParticleContainer&lt; T_NStructReal, T_NStructInt, T_NArrayReal, T_NArrayInt &gt;" name="amrex::ParticleContainer&lt; T_NStructReal, T_NStructInt, T_NArrayReal, T_NArrayInt &gt;">
+<area shape="rect" id="node1" title="A distributed container for Particles sorted onto the levels, grids, and tiles of a block&#45;structured ..." alt="" coords="5,80,212,136"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_particle_container_base.html" title=" " alt="" coords="11,5,207,32"/>
+</map>

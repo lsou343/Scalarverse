@@ -1,0 +1,13 @@
+<map id="amrex::AmrDataAdaptor::InternalsType" name="amrex::AmrDataAdaptor::InternalsType">
+<area shape="rect" id="node1" title=" " alt="" coords="297,692,459,733"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_amr.html" title="Manage hierarchy of levels for time&#45;dependent AMR computations." alt="" coords="267,595,358,622"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_amr_core.html" title="Provide basic functionalities to set up an AMR hierarchy." alt="" coords="91,374,209,401"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_amr_mesh.html" title=" " alt="" coords="134,231,257,257"/>
+<area shape="rect" id="node5" href="$structamrex_1_1_amr_info.html" title=" " alt="" coords="93,95,205,121"/>
+<area shape="rect" id="node6" title=" " alt="" coords="5,5,55,32"/>
+<area shape="rect" id="node7" title=" " alt="" coords="233,374,288,401"/>
+<area shape="rect" id="node8" title=" " alt="" coords="340,374,413,401"/>
+<area shape="rect" id="node9" href="$classamrex_1_1_level_bld.html" title="Builds problem&#45;specific AmrLevels." alt="" coords="437,374,553,401"/>
+<area shape="rect" id="node10" href="$classamrex_1_1_in_situ_utils_1_1_descriptor_map.html" title=" " alt="" coords="484,588,611,629"/>
+<area shape="rect" id="node11" href="$classamrex_1_1_in_situ_utils_1_1_state_map.html" title=" " alt="" coords="577,367,704,408"/>
+</map>

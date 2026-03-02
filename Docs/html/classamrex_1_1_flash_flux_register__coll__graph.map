@@ -1,0 +1,7 @@
+<map id="amrex::FlashFluxRegister" name="amrex::FlashFluxRegister">
+<area shape="rect" id="node1" title=" " alt="" coords="83,304,255,331"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_distribution_mapping.html" title="Calculates the distribution of FABs to MPI processes." alt="" coords="5,200,187,227"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_geometry.html" title=" " alt="" coords="211,200,333,227"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_coord_sys.html" title="Coordinate System." alt="" coords="210,124,334,151"/>
+<area shape="rect" id="node5" title=" " alt="" coords="247,5,297,32"/>
+</map>

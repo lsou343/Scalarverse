@@ -1,0 +1,4 @@
+<map id="amrex::FabArrayBase::CopyComTag" name="amrex::FabArrayBase::CopyComTag">
+<area shape="rect" id="node1" title="Used by a bunch of routines when communicating via MPI." alt="" coords="5,109,155,151"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_box.html" title="A Rectangular Domain on an Integer Lattice." alt="" coords="35,5,125,32"/>
+</map>

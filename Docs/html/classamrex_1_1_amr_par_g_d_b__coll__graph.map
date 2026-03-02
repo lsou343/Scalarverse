@@ -1,0 +1,8 @@
+<map id="amrex::AmrParGDB" name="amrex::AmrParGDB">
+<area shape="rect" id="node1" title=" " alt="" coords="58,336,197,363"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_par_g_d_b_base.html" title=" " alt="" coords="5,247,151,273"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_amr_core.html" title="Provide basic functionalities to set up an AMR hierarchy." alt="" coords="175,247,293,273"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_amr_mesh.html" title=" " alt="" coords="173,171,295,197"/>
+<area shape="rect" id="node5" href="$structamrex_1_1_amr_info.html" title=" " alt="" coords="178,95,290,121"/>
+<area shape="rect" id="node6" title=" " alt="" coords="209,5,259,32"/>
+</map>

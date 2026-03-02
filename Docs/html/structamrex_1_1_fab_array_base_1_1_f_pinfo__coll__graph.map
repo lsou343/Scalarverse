@@ -1,0 +1,7 @@
+<map id="amrex::FabArrayBase::FPinfo" name="amrex::FabArrayBase::FPinfo">
+<area shape="rect" id="node1" title=" " alt="" coords="283,124,432,165"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_distribution_mapping.html" title="Calculates the distribution of FABs to MPI processes." alt="" coords="5,13,187,39"/>
+<area shape="rect" id="node3" href="$structamrex_1_1_fab_array_base_1_1_b_d_key.html" title=" " alt="" coords="211,5,360,47"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_box.html" title="A Rectangular Domain on an Integer Lattice." alt="" coords="385,13,474,39"/>
+<area shape="rect" id="node5" href="$classamrex_1_1_int_vect.html" title=" " alt="" coords="499,13,605,39"/>
+</map>

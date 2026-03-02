@@ -1,0 +1,34 @@
+###########
+# Sources #
+###########
+
+CEXE_sources += BaseAx.cpp
+
+ifeq ($(USE_GRAV), TRUE)
+  ifeq ($(USE_NEWT), TRUE)
+    CEXE_sources += BaseNewt.cpp
+  else
+    CEXE_sources += BaseGrav.cpp
+  endif
+endif
+
+###########
+# Headers #
+###########
+
+CEXE_headers += BaseAx.H
+
+ifeq ($(USE_INFLATION), TRUE)
+    ifeq ($(USE_COMOV_FULL), TRUE)
+      CEXE_headers += BaseKG.H
+    endif
+endif
+
+
+ifeq ($(USE_GRAV), TRUE)
+  ifeq ($(USE_NEWT), TRUE)
+    CEXE_headers += BaseNewt.H
+  else
+    CEXE_headers += BaseGrav.H
+  endif
+endif

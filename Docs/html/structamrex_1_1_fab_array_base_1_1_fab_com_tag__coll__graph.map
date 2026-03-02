@@ -1,0 +1,4 @@
+<map id="amrex::FabArrayBase::FabComTag" name="amrex::FabArrayBase::FabComTag">
+<area shape="rect" id="node1" title="Used for collecting information used in communicating FABs." alt="" coords="5,95,155,136"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_box.html" title="A Rectangular Domain on an Integer Lattice." alt="" coords="35,5,125,32"/>
+</map>

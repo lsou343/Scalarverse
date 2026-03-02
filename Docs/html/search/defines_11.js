@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['sdim_0',['SDIM',['../_a_m_re_x___a_v_g_d_o_w_n__2_d_8_f.html#a8e0a6bf77df4cfb76fdb894573a13c0b',1,'SDIM():&#160;AMReX_AVGDOWN_2D.F'],['../_a_m_re_x___a_v_g_d_o_w_n__3_d_8_f.html#a8e0a6bf77df4cfb76fdb894573a13c0b',1,'SDIM():&#160;AMReX_AVGDOWN_3D.F'],['../_a_v_g_d_o_w_n__2_d_8_f.html#a8e0a6bf77df4cfb76fdb894573a13c0b',1,'SDIM():&#160;AVGDOWN_2D.F'],['../_a_v_g_d_o_w_n__3_d_8_f.html#a8e0a6bf77df4cfb76fdb894573a13c0b',1,'SDIM():&#160;AVGDOWN_3D.F'],['../_a_m_re_x___a_v_g_d_o_w_n__1_d_8_f.html#a8e0a6bf77df4cfb76fdb894573a13c0b',1,'SDIM():&#160;AMReX_AVGDOWN_1D.F']]],
+  ['showval_1',['SHOWVAL',['../_a_m_re_x___amr_data_8cpp.html#a943ee05343b5b1f9139dcc582078b9ef',1,'SHOWVAL():&#160;AMReX_AmrData.cpp'],['../_a_m_re_x___b_l_prof_stats_8cpp.html#a943ee05343b5b1f9139dcc582078b9ef',1,'SHOWVAL():&#160;AMReX_BLProfStats.cpp'],['../_a_m_re_x___b_l_prof_utilities_8cpp.html#a943ee05343b5b1f9139dcc582078b9ef',1,'SHOWVAL():&#160;AMReX_BLProfUtilities.cpp'],['../_a_m_re_x___comm_prof_stats_8cpp.html#a943ee05343b5b1f9139dcc582078b9ef',1,'SHOWVAL():&#160;AMReX_CommProfStats.cpp'],['../_a_m_re_x___prof_parser_batch_8cpp.html#a943ee05343b5b1f9139dcc582078b9ef',1,'SHOWVAL():&#160;AMReX_ProfParserBatch.cpp'],['../_a_m_re_x___regions_prof_stats_8cpp.html#a943ee05343b5b1f9139dcc582078b9ef',1,'SHOWVAL():&#160;AMReX_RegionsProfStats.cpp']]],
+  ['slipwall_2',['SlipWall',['../_a_m_re_x___b_c___t_y_p_e_s_8_h.html#ab7772f51c4ecaa9d12aaa1ca2d381ad4',1,'AMReX_BC_TYPES.H']]],
+  ['slx_3',['SLX',['../_a_m_re_x___i_n_t_e_r_p__1_d_8_f90.html#a0e2e2226dc8d3bcd49b34e7656cdd4f6',1,'AMReX_INTERP_1D.F90']]],
+  ['slxy_4',['SLXY',['../_a_m_re_x___i_n_t_e_r_p__1_d_8_f90.html#a3765cb3d3da2b7aa5cbc9967a162bf88',1,'AMReX_INTERP_1D.F90']]],
+  ['sly_5',['SLY',['../_a_m_re_x___i_n_t_e_r_p__1_d_8_f90.html#a5c28b0e34556d1c30ea0c017a208248b',1,'AMReX_INTERP_1D.F90']]],
+  ['stencil_5fcoef0_6',['STENCIL_COEF0',['../operators_827pt_8c.html#a1112c37b5a581bf03c3150304cf43b25',1,'operators.27pt.c']]],
+  ['stencil_5fcoef1_7',['STENCIL_COEF1',['../operators_827pt_8c.html#acd5e366ec8cb132aaf928f015898ac2b',1,'operators.27pt.c']]],
+  ['stencil_5fcoef2_8',['STENCIL_COEF2',['../operators_827pt_8c.html#a2ec258285f4a669eac93f72f270c0d59',1,'operators.27pt.c']]],
+  ['stencil_5fcoef3_9',['STENCIL_COEF3',['../operators_827pt_8c.html#a335700cb4f4b58981dc0dc0ea7079dd0',1,'operators.27pt.c']]],
+  ['stencil_5fmax_5fshapes_10',['STENCIL_MAX_SHAPES',['../level_8h.html#ac09d211c6cf321649357d8aead31d94a',1,'level.h']]],
+  ['stencil_5fshape_5fbox_11',['STENCIL_SHAPE_BOX',['../level_8h.html#a457ced98ab5d9750d233dec2517a0cb0',1,'level.h']]],
+  ['stencil_5fshape_5fno_5fcorners_12',['STENCIL_SHAPE_NO_CORNERS',['../level_8h.html#a5a249b49ed4ab1c13a6b9f7bc27b0622',1,'level.h']]],
+  ['stencil_5fshape_5fstar_13',['STENCIL_SHAPE_STAR',['../level_8h.html#aed2ee9fc70e943062660b779c6e4507e',1,'level.h']]],
+  ['stencil_5ftwelfth_14',['STENCIL_TWELFTH',['../operators_8fv4_8c.html#a2912a6d044494202587e012895cedb6d',1,'operators.fv4.c']]],
+  ['strip_15',['STRIP',['../_a_m_re_x___amr_8cpp.html#a53529d9638a1d70f6e5989dedf4c2672',1,'STRIP():&#160;AMReX_Amr.cpp'],['../_a_m_re_x___amr_8cpp.html#a53529d9638a1d70f6e5989dedf4c2672',1,'STRIP():&#160;AMReX_Amr.cpp']]],
+  ['symmetry_16',['Symmetry',['../_a_m_re_x___b_c___t_y_p_e_s_8_h.html#accd2f3c4d52a3931acd886e0ad0ab461',1,'AMReX_BC_TYPES.H']]]
+];

@@ -1,0 +1,4 @@
+<map id="amrex::AllPrint" name="amrex::AllPrint">
+<area shape="rect" id="node1" title="Print on all processors of the default communicator." alt="" coords="5,80,113,107"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_print.html" title="This class provides the user with a few print options." alt="" coords="13,5,106,32"/>
+</map>

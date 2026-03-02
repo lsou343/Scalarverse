@@ -1,0 +1,10 @@
+<map id="amrex::ParticleContainer&lt; T_NStructReal, T_NStructInt, T_NArrayReal, T_NArrayInt &gt;" name="amrex::ParticleContainer&lt; T_NStructReal, T_NStructInt, T_NArrayReal, T_NArrayInt &gt;">
+<area shape="rect" id="node1" title="A distributed container for Particles sorted onto the levels, grids, and tiles of a block&#45;structured ..." alt="" coords="580,196,787,252"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_particle_container_base.html" title=" " alt="" coords="200,5,396,32"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_real_descriptor.html" title="This class is meant to hold all information needed to completely describe the &quot;Real&quot; floating&#45;point t..." alt="" coords="221,56,375,83"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_int_vect.html" title=" " alt="" coords="245,160,351,187"/>
+<area shape="rect" id="node5" title=" " alt="" coords="271,211,325,237"/>
+<area shape="rect" id="node6" href="$classamrex_1_1_particle_buffer_map.html" title=" " alt="" coords="213,261,383,288"/>
+<area shape="rect" id="node7" href="$classamrex_1_1_par_g_d_b_base.html" title=" " alt="" coords="5,344,151,371"/>
+<area shape="rect" id="node8" href="$classamrex_1_1_par_g_d_b.html" title="we use this for non&#45;Amr particle code" alt="" coords="241,375,355,401"/>
+</map>

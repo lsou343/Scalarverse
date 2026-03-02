@@ -1,0 +1,6 @@
+<map id="amrex::AmrLevel" name="amrex::AmrLevel">
+<area shape="rect" id="node1" title="Virtual base class for managing individual levels. AmrLevel functions both as a container for state d..." alt="" coords="95,5,216,32"/>
+<area shape="rect" id="node2" href="$class_amr_level_adv.html" title=" " alt="" coords="5,80,105,107"/>
+<area shape="rect" id="node3" href="$class_c_n_s.html" title=" " alt="" coords="130,80,181,107"/>
+<area shape="rect" id="node4" href="$class_nyx.html" title=" " alt="" coords="205,80,252,107"/>
+</map>

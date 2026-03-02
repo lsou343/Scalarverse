@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$structamrex_1_1_amr_info.html" title=" " alt="" coords="5,56,117,83"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_amr_mesh.html" title=" " alt="" coords="165,56,288,83"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_amr_core.html" title="Provide basic functionalities to set up an AMR hierarchy." alt="" coords="336,56,455,83"/>
+<area shape="rect" id="node4" href="$class_amr_core_adv.html" title=" " alt="" coords="517,5,614,32"/>
+<area shape="rect" id="node5" href="$classamrex_1_1_amr.html" title="Manage hierarchy of levels for time&#45;dependent AMR computations." alt="" coords="520,56,611,83"/>
+<area shape="rect" id="node6" href="$classamrex_1_1_f_amr_core.html" title=" " alt="" coords="503,107,628,133"/>
+</map>

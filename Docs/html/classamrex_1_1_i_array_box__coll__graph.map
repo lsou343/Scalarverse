@@ -1,0 +1,7 @@
+<map id="amrex::IArrayBox" name="amrex::IArrayBox">
+<area shape="rect" id="node1" title="A Fortran Array of ints." alt="" coords="21,336,145,363"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_base_fab.html" title=" " alt="" coords="5,260,161,287"/>
+<area shape="rect" id="node3" href="$structamrex_1_1_data_allocator.html" title=" " alt="" coords="11,184,156,211"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_arena.html" title="A virtual base class for objects that manage their own dynamic memory allocation." alt="" coords="33,95,133,121"/>
+<area shape="rect" id="node5" href="$structamrex_1_1_arena_info.html" title=" " alt="" coords="22,5,145,32"/>
+</map>

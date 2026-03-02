@@ -1,0 +1,59 @@
+###########
+# Sources #
+###########
+
+ifeq ($(USE_INFLATION), TRUE)
+    ifeq ($(USE_COMOV_FULL), TRUE)
+      CEXE_sources += KGDeriveComov.cpp
+    else
+      CEXE_sources += KGDerive.cpp
+    endif
+endif
+
+
+ifeq ($(USE_SCHROEDINGER), TRUE)
+    ifeq ($(USE_COMOV_FULL), TRUE)
+      CEXE_sources += SCHDeriveComov.cpp
+    else
+      CEXE_sources += SCHDerive.cpp
+    endif
+endif
+
+ifeq ($(USE_GRAV), TRUE)
+  ifeq ($(USE_SCHROEDINGER), FALSE)
+    ifeq ($(USE_NEWT), TRUE)
+      CEXE_sources += NewtDerive.cpp
+    else
+      CEXE_sources += TestGravDerive.cpp
+    endif
+  endif
+endif
+
+###########
+# Headers #
+###########
+
+ifeq ($(USE_INFLATION), TRUE)
+  CEXE_headers += KGDerive.H
+    # ifeq ($(USE_COMOV_FULL), TRUE)
+    #   CEXE_headers += AxKGComov.H
+    # endif
+endif
+
+ifeq ($(USE_SCHROEDINGER), TRUE)
+    ifeq ($(USE_COMOV_FULL), TRUE)
+      CEXE_headers += SCHDeriveComov.H
+    else
+      CEXE_headers += SCHDerive.H
+    endif
+endif
+
+ifeq ($(USE_GRAV), TRUE)
+  ifeq ($(USE_SCHROEDINGER), FALSE)
+    ifeq ($(USE_NEWT), TRUE)
+      CEXE_headers += NewtDerive.H
+    else
+      CEXE_headers += TestGravDerive.H
+    endif
+  endif
+endif

@@ -1,0 +1,4 @@
+<map id="amrex::BArena" name="amrex::BArena">
+<area shape="rect" id="node1" title="A Concrete Class for Dynamic Memory Management This is the simplest dynamic memory management class d..." alt="" coords="5,80,115,107"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_arena.html" title="A virtual base class for objects that manage their own dynamic memory allocation." alt="" coords="10,5,110,32"/>
+</map>

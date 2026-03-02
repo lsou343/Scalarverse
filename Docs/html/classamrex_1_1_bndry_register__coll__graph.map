@@ -1,0 +1,4 @@
+<map id="amrex::BndryRegister" name="amrex::BndryRegister">
+<area shape="rect" id="node1" title="A BndryRegister organizes FabSets bounding each grid in a BoxArray. A FabSet is maintained for each b..." alt="" coords="5,95,155,121"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_fab_set.html" title="A FabSet is a group of FArrayBox&#39;s. The grouping is designed specifically to represent regions along ..." alt="" coords="26,5,134,32"/>
+</map>

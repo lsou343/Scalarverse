@@ -1,0 +1,125 @@
+================================================================================
+JobID = 6432415
+User = u11404, Account = mthesis_hyunkyu_lee
+Partition = medium, Nodelist = amp067
+================================================================================
+Initializing AMReX (25.02)...
+MPI initialized with 1 MPI processes
+MPI initialized with thread support level 0
+AMReX (25.02) initialized
+
+AMReX git describe: 
+Adding descriptors to desc_lst...
+Setting components...
+Variable setup complete.
+Initializing Gravity object.
+Getting Gconst from nyx_constants: 4.300927161e-09
+Using -5.404704468e-08 for 4 pi G in Gravity.cpp 
+Installing gravity level 0...
+Installing Gravity level 0
+AxTestGrav constructor called for level 0 at time 0.
+Initializing time-dependent variables.
+AxTestGrav::initData: Checking state_new allocation...
+AxTestGrav::initData: state_new has 1 components.
+BaseGrav::vol_weight_sum: Starting calculation for derived quantity 'density' at time 0.
+Attempting to derive quantity 'density' at time 0
+vol_weight_sum: Checking MultiFab validity.
+vol_weight_sum: Computation complete. Volume-weighted sum = 2.899169922e+43
+Gravity ... defining average density in Gravity::set_mass_offset to be 3.623962402e+36
+checkpoint AxTestGrav::initdate
+Setting the current time in the state data to 0
+checkpoint Grav_IO::write_info
+Output file ./plt00000.temp at time 0.000000 and step 0
+checkpoint Grav_IO::writePlotFilePost
+Installing gravity level 0...
+Installing Gravity level 0
+AxTestGrav constructor called for level 0 at time 0.
+Initializing time-dependent variables.
+Setting the current time in the state data to 0
+AxTestGrav destructor called.
+AxTestGrav::advance at time 0 with dt 0.05
+Gravity ... single level solve for new phi at level 0
+Rhs norm before solving: 0
+Density norm: 2.179449472e+41
+RHS norm before scaling: 2.179449472e+41
+RHS norm after scaling: 1.17792803e+34
+ ... solve for phi at level 0
+ ... subtracting average density from RHS in solve ... 3.623962402e+36
+After mass correction2 1.85546885e+39
+vol_weight_sum: Checking MultiFab validity.
+vol_weight_sum: Computation complete. Volume-weighted sum = -3.623962598e+36
+ ... current avg differs from mass_offset by -3.623962598e+36 
+ ... Gravity : single_level solve for phi -- total mass has changed!
+ ... subtracting -3.623962598e+36 to ensure solvability 
+Phi norm after Poisson solve: 2.134161027e+28
+Setting the current time in the state data to 0
+Diagnostics for φ:
+  L₂ norm  = 2.134161027e+28
+checkpoint Grav_IO::write_info
+End of postCoarseTimeStep, printing:
+MultiFab Tag, current usage and hwm in bytes
+All: 29597088, 52282656
+AmrLevel_Level_0: 12158976, 24317952
+StateData: 12158976, 24317952
+StateData_0_Level_0: 2097152, 4194304
+StateData_0_New_Level_0: 2097152, 4194304
+StateData_1_Level_0: 2515456, 5030912
+StateData_1_New_Level_0: 2515456, 5030912
+StateData_2_Level_0: 7546368, 15092736
+StateData_2_New_Level_0: 7546368, 15092736
+StateData_Level_0: 12158976, 24317952
+[The  Pinned Arena] space (MB) allocated spread across MPI: [8 ... 8]
+[The  Pinned Arena] space (MB) used      spread across MPI: [0 ... 0]
+AxTestGrav::advance at time 0.05 with dt 0.05
+Gravity ... single level solve for new phi at level 0
+Rhs norm before solving: 0
+Density norm: 2.179449472e+41
+RHS norm before scaling: 2.179449472e+41
+RHS norm after scaling: 1.17792803e+34
+ ... solve for phi at level 0
+ ... subtracting average density from RHS in solve ... 3.623962402e+36
+After mass correction2 1.85546885e+39
+vol_weight_sum: Checking MultiFab validity.
+vol_weight_sum: Computation complete. Volume-weighted sum = -3.623962598e+36
+ ... current avg differs from mass_offset by -3.623962598e+36 
+ ... Gravity : single_level solve for phi -- total mass has changed!
+ ... subtracting -3.623962598e+36 to ensure solvability 
+Phi norm after Poisson solve: 2.134161027e+28
+Setting the current time in the state data to 0.05
+Diagnostics for φ:
+  L₂ norm  = 2.134161027e+28
+checkpoint Grav_IO::write_info
+End of postCoarseTimeStep, printing:
+MultiFab Tag, current usage and hwm in bytes
+All: 29597088, 52282656
+AmrLevel_Level_0: 12158976, 24317952
+StateData: 12158976, 24317952
+StateData_0_Level_0: 2097152, 4194304
+StateData_0_New_Level_0: 2097152, 4194304
+StateData_1_Level_0: 2515456, 5030912
+StateData_1_New_Level_0: 2515456, 5030912
+StateData_2_Level_0: 7546368, 15092736
+StateData_2_New_Level_0: 7546368, 15092736
+StateData_Level_0: 12158976, 24317952
+[The  Pinned Arena] space (MB) allocated spread across MPI: [8 ... 8]
+[The  Pinned Arena] space (MB) used      spread across MPI: [0 ... 0]
+Time w/o init: 0.23834524
+Output file ./plt00002.temp at time 0.100000 and step 2
+checkpoint Grav_IO::writePlotFilePost
+AxTestGrav destructor called.
+Run time = 0.398691627
+Unused ParmParse Variables:
+  [TOP]::KG.ICType(nvals = 1)  :: [1]
+  [TOP]::KG.KG0(nvals = 1)  :: [0.342]
+  [TOP]::KG.KG_k(nvals = 1)  :: [2]
+  [TOP]::KG.beta(nvals = 1)  :: [4]
+  [TOP]::KG.lambda(nvals = 1)  :: [9.e-14]
+  [TOP]::KG.mass(nvals = 1)  :: [1.e-7]
+  [TOP]::KG.simType(nvals = 1)  :: [0]
+  [TOP]::amr.ref_ratio(nvals = 5)  :: [2, 2, 2, 2, 2]
+  [TOP]::amr.regrid_int(nvals = 4)  :: [1, 2, 4, 8]
+  [TOP]::ax.interpolator(nvals = 1)  :: [1]
+  [TOP]::gravity.gravity_type(nvals = 1)  :: [PoissonGrav]
+  [TOP]::gravity.show_timings(nvals = 1)  :: [1]
+
+AMReX (25.02) finalized

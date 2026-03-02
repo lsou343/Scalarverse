@@ -1,0 +1,43 @@
+###########
+# Sources #
+###########
+
+CEXE_sources += Base_IO.cpp 
+
+ifeq ($(USE_INFLATION), TRUE)
+
+    CEXE_sources += KG_IO.cpp
+
+    ifeq ($(USE_COMOV_FULL), TRUE)
+        CEXE_sources += KG_Comov_IO.cpp
+    endif
+endif
+
+ifeq ($(USE_SCHROEDINGER), TRUE)
+
+    CEXE_sources += SCH_IO.cpp
+   ifeq ($(USE_COMOV_EOS), TRUE)
+       CEXE_sources += SCH_Comov_IO.cpp
+          ifeq ($(USE_GRAV), TRUE)
+            CEXE_sources += SP_IO.cpp
+        endif
+   endif
+endif
+
+
+ifeq ($(USE_GRAV), TRUE)
+  ifeq ($(USE_SCHROEDINGER), FALSE)
+    ifeq ($(USE_NEWT), TRUE)
+      CEXE_sources += Newt_IO.cpp
+    else
+      CEXE_SOURCES += Grav_IO.cpp
+    endif
+  endif
+endif
+
+
+###########
+# Headers #
+###########
+
+# N/A

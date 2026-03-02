@@ -1,0 +1,7 @@
+<map id="amrex::Arena" name="amrex::Arena">
+<area shape="rect" id="node1" title="A virtual base class for objects that manage their own dynamic memory allocation." alt="" coords="211,5,311,32"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_b_arena.html" title="A Concrete Class for Dynamic Memory Management This is the simplest dynamic memory management class d..." alt="" coords="5,80,115,107"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_c_arena.html" title="A Concrete Class for Dynamic Memory Management using first fit. This is a coalescing memory manager...." alt="" coords="139,80,250,107"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_d_arena.html" title=" " alt="" coords="274,80,385,107"/>
+<area shape="rect" id="node5" href="$classamrex_1_1_e_arena.html" title="A Concrete Class for Dynamic Memory Management using best fit. This is a coalescing memory manager...." alt="" coords="409,80,519,107"/>
+</map>

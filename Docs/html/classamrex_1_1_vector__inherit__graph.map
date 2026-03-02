@@ -1,0 +1,4 @@
+<map id="amrex::Vector&lt; T, Allocator &gt;" name="amrex::Vector&lt; T, Allocator &gt;">
+<area shape="rect" id="node1" title="This class is a thin wrapper around std::vector. Unlike vector, Vector::operator[] provides bound che..." alt="" coords="5,95,196,121"/>
+<area shape="rect" id="node2" title=" " alt="" coords="37,5,165,47"/>
+</map>

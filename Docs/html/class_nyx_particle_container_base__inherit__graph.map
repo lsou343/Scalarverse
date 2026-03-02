@@ -1,0 +1,10 @@
+<map id="NyxParticleContainerBase" name="NyxParticleContainerBase">
+<area shape="rect" id="node1" title=" " alt="" coords="5,111,181,138"/>
+<area shape="rect" id="node2" href="$class_nyx_particle_container.html" title=" " alt="" coords="229,5,428,47"/>
+<area shape="rect" id="node4" href="$class_nyx_particle_container.html" title=" " alt="" coords="251,71,406,112"/>
+<area shape="rect" id="node6" href="$class_nyx_particle_container.html" title=" " alt="" coords="251,136,406,177"/>
+<area shape="rect" id="node8" href="$class_nyx_particle_container.html" title=" " alt="" coords="241,201,416,243"/>
+<area shape="rect" id="node3" href="$class_a_g_n_particle_container.html" title=" " alt="" coords="494,13,645,39"/>
+<area shape="rect" id="node5" href="$class_dark_matter_particle_container.html" title=" " alt="" coords="476,78,663,105"/>
+<area shape="rect" id="node7" href="$class_f_d_mphase_particle_container.html" title=" " alt="" coords="476,143,663,170"/>
+</map>

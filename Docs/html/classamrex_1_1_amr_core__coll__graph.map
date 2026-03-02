@@ -1,0 +1,6 @@
+<map id="amrex::AmrCore" name="amrex::AmrCore">
+<area shape="rect" id="node1" title="Provide basic functionalities to set up an AMR hierarchy." alt="" coords="7,247,126,273"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_amr_mesh.html" title=" " alt="" coords="5,171,128,197"/>
+<area shape="rect" id="node3" href="$structamrex_1_1_amr_info.html" title=" " alt="" coords="11,95,123,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="42,5,91,32"/>
+</map>

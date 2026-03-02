@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classamrex_1_1_bndry_register.html" title="A BndryRegister organizes FabSets bounding each grid in a BoxArray. A FabSet is maintained for each b..." alt="" coords="5,56,155,83"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_bndry_data.html" title="A BndryData contains a BndryRegister about each side of each grid in a Boxarray. These data are used ..." alt="" coords="209,31,337,57"/>
+<area shape="rect" id="node6" href="$classamrex_1_1_flux_register.html" title="Flux Register." alt="" coords="203,81,343,108"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_interp_bndry_data.html" title=" " alt="" coords="391,31,552,57"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_m_l_m_g_bndry.html" title=" " alt="" coords="600,5,739,32"/>
+<area shape="rect" id="node5" href="$classamrex_1_1_mac_bndry.html" title=" " alt="" coords="607,56,732,83"/>
+</map>

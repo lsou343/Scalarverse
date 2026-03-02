@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classamrex_1_1_arena.html" title="A virtual base class for objects that manage their own dynamic memory allocation." alt="" coords="5,81,105,108"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_b_arena.html" title="A Concrete Class for Dynamic Memory Management This is the simplest dynamic memory management class d..." alt="" coords="154,5,263,32"/>
+<area shape="rect" id="node3" href="$classamrex_1_1_c_arena.html" title="A Concrete Class for Dynamic Memory Management using first fit. This is a coalescing memory manager...." alt="" coords="153,56,264,83"/>
+<area shape="rect" id="node4" href="$classamrex_1_1_d_arena.html" title=" " alt="" coords="153,107,264,133"/>
+<area shape="rect" id="node5" href="$classamrex_1_1_e_arena.html" title="A Concrete Class for Dynamic Memory Management using best fit. This is a coalescing memory manager...." alt="" coords="154,157,263,184"/>
+</map>

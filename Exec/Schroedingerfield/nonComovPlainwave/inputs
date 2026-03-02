@@ -1,0 +1,153 @@
+# ------------------  INPUTS TO MAIN PROGRAM  -------------------
+
+
+# -------------- REFINEMENT / REGRIDDING ----------------
+#amr.compute_new_dt_on_regrid = 1
+amr.max_level = 1 # 0
+amr.ref_ratio = 2 2 2   
+#amr.refine_grid_layout = 0
+#amr.use_fixed_coarse_grids = 1
+#amr.use_fixed_upto_level = 1  # should be set to 0 for root grid only
+amr.regrid_on_restart  = 1 #TODO
+amr.grid_eff = 0.7 #TODO
+amr.subcycling_mode = Manual #TODO
+amr.regrid_int = 1 2 4 8
+amr.subcycling_iterations = 1 2 2 2 2 2 2 2 2 2 2 2 2 2 #TODO
+#
+# amr.refinement_indicators = dens1 dens2 dens3
+amr.refinement_indicators = dens1 
+amr.dens1.field_name = Dens
+amr.dens1.value_greater = 100 
+amr.dens1.max_level = 1
+
+# amr.dens1.field_name = AxDens
+# amr.dens1.value_greater = 2.968e10 # corresponding to 5*mean_dens
+# amr.dens1.max_level = 1
+#
+# amr.dens2.field_name = AxDens
+# amr.dens2.value_greater =  5.936e10 # corresponding to 10*mean_dens
+# amr.dens2.max_level = 2
+#
+# amr.dens3.field_name = AxDens
+# amr.dens3.value_greater = 1.187e11 # corresponding to 20*mean_dens
+# amr.dens3.max_level = 3
+#
+# nyx.interpolator = 2
+
+
+
+# New SCH Axioax inputs  --PH
+# ####################### #
+# AXIONYX PARAMETERS      #
+# ####################### #
+
+# SCH.simType                = 0           # Single Field Quartic 
+SCH.ICType                 = 2          # 0 = test, 1 = plain wave, 2 = gaussian 
+SCH.SCH_k0                 = 1           # Initial k mode  
+SCH.Phase0                = 0.0         # Initial phase of the field
+SCH.SCH0                    = 100.0    # Initial amplitude of the field
+SCH.sigma                 = 0.1         # Width of the gaussian
+SCH.vonNeumann_dt             = 1.0        # von Neumann stability factor, should be set to 1.
+SCH.mtt                   = 1.0         # FDM mass in 10⁻22 eV, use 1.0 if using hbaroverm 6.582119569e-16 eV s
+SCH.hbaroverm             = 0.01917152 #6.582119569e-16 # hbar/m in eV s
+#SCH.mass                   = 1.e-7       # As per the LatticeEasy ONEFLDLAMBDA model.
+# ax.mass                   = 0.        # As per the LatticeEasy ONEFLDLAMBDA model.
+# SCH.lambda                 = 0.          # As per the LatticeEasy ONEFLDLAMBDA model.
+# SCH.lambda                 = 9.e-14    # As per the LatticeEasy ONEFLDLAMBDA model.
+# SCH.SCH0                    = 0.342052       # As per the LatticeEasy ONEFLDLAMBDA model.
+  
+# SCH.beta                   = 4           # As per the LatticeEasy ONEFLDLAMBDA model.
+
+# ####################### #
+# NYX PARAMETERS          #
+# ####################### #
+
+# ## End condition
+# max_step                 = 1000          # Maximum number of level 0 steps 
+max_step                 = 2       # Maximum number of level 0 steps 
+# stop_time                 = 50      # Final simulation time
+# ax.final_a                           # Final value of a
+# ax.final_z                           # Final value of z
+
+# ## Integration methods
+# ax.levelmethod           = 0 0 0 0   # which method to use 3=spectral, 0=finite_difference
+# ax.order                 = 2         # nth order spectral method 2 or 6
+ax.interpolator          = 1           # 1 = bilinear interpolation , 2 = quartic interpolation
+
+# ## Diagnostics & verbosity
+ax.v                     = 0           # Verbosity ranges from 0 (least) to 3 (most)
+particles.v = 0                         # TODO
+
+
+# ## Nyx physics 
+# ax.comoving_OmB = 0.0                  # Omega_baryon --- baryon fractional energy density.
+# ax.comoving_OmM = 1.0                  # Omega_matter --- total matter fractional energy density. (i.e., pure matter)
+# ax.comoving_OmR = 0.0                  # Omega_radiation --- total radiation fractional energy density. 
+# ax.comoving_h = 0.0                    # This is H_0/(100 km/s/Mpc). h = 0 switches off evolution of the scale factor
+# ax.initial_z = 0.0                     # Initial redshift  ## NECESSARY
+# ax.do_dm_particles = 0                 # TODO
+# ax.particle_init_type = bla            # Nonsense value, switches off DM particles.
+# ax.particle_move_type = Gravitational  # Irrelevant since particles are switched off.
+# ax.sum_interval = 1                    # TODO
+# ax.cfl = 0.5                           # CFL is something to do with the hydro equations, which I'll remove
+# ax.init_shrink = 1.0                   # TODO
+ax.dt_cutoff  = 5.e-23                 # Time step below which calculation will abort   ## NECESSARY
+ax.lo_bc = 0 0 0                       # Boundary types: 0 = interior/periodic, 1 = inflow, 2 = outflow, 3 = symmetry
+ax.hi_bc = 0 0 0                       #                 4 = slip wall, 5 = no-slip wall. We'll only use 0.
+# ax.fixed_dt = 1.62e-21                     # Converting Nyx time, T_UNIT = 3.0856776e19
+ax.fixed_dt = 0 #0.05                     # As per LatticeEasy ONEFLDLAMBDA example
+                                        # Use a fixed time-step. I might make this the only one in Axioax_KG 
+                                        # For more, see https://amrex-astro.github.io/Nyx/docs_html/NyxInputs.html#regridding
+ 
+# ####################### #
+# AMREX PARAMETERS        #
+# ####################### #
+
+# If restarting from a checkpoint, specify the checkpoint.
+# amr.restart               = ./chk00100
+
+# ## Problem size & geometry
+geometry.is_periodic      = 1 1 1            # Periodic = 1; Fixed = 0
+geometry.coord_sys        = 0                # Cartesian = 0
+geometry.prob_lo          = 0.0 0.0 0.0      # Physical location of lower corner of domain (in MPc)
+# geometry.prob_hi          = 1.0 1.0 1.0    # Physical location of upper corner of domain (in MPc) 
+geometry.prob_hi          = 1.0 1.0 1.0         # Physical location of upper corner of domain (in MPc) 
+amr.n_cell                = 64 64 64         # Number of cells in x y z
+amr.max_grid_size         = 32              # Max number of cells in a grid (used for parallelizing)
+amr.blocking_factor       = 32                # Dimension of grids is a multiple of this. Can have one for each level
+
+# ## Diagnostics & verbosity
+amr.v                     = 0                # Verbosity ranges from 0 (least) to 3 (most)
+amr.grid_log              = Output/grdlog           # Name of grid logging file
+
+# ## Refinement / regridding (Not used in KG yet)
+# amr.max_level             = 0                # Maximum refinement level number allowed
+# amr.ref_ratio             = 2 2 2 2 2        # Refinement ratio between levels (0->1) (1->2) (2->3) etc.
+# amr.regrid_int            = 1 2 4 8          # When to re-grid per level (0 1 2 etc.)
+amr.n_error_buf           = 2                # TODO
+#amr.refine_grid_layout   = 1                # TODO
+# amr.regrid_on_restart     = 1                # TODO
+# amr.subcycling_mode       = Manual           # TODO
+# amr.subcycling_iterations = 2                # TODO
+# amr.grid_eff              = 0.8              # TODO
+amr.n_proper              = 0                # TODO
+# amr.refinement_indicators = string         # The interesting areas to focus computational power (E.g., clusters)
+
+# ## Checkpoint files
+amr.check_file            = Output/chk              # The prefix of checkpoint folder names
+amr.check_int             = 100              # The interval of steps at which to save checkpoints
+
+# ## Plotfiles
+amr.plot_file             = Output/plt              # The prefix of plot folder names
+amr.plot_int              = 50               # The interval of steps at which to save plots 
+
+# ## Log file 
+amr.data_log = Output/runlog                        # The name of the run log
+
+# ## Output field names
+amr.plot_vars = SCHf_Re SCHf_Im Dens Phase               # Primitive fields output in plot folders/checkpoints
+# amr.derive_plot_vars = SCHf_Re SCHf_Im #SCHf SCHfv SCHfdens             # Derived fields output in plot folders/checkpoints 
+
+# ## Other
+amr.probin_file = ""                         # TODO
+

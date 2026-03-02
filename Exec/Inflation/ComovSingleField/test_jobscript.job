@@ -1,0 +1,19 @@
+#!/bin/bash --login
+#SBATCH -t 00:10:00                # Runtime (30 minutes)
+#SBATCH -N 1                # Use 1 node
+#SBATCH --tasks-per-node=1        # Adjust to the core count of the medium partition nodes
+#SBATCH -p scc-cpu             # Use the test partition for faster scheduling
+#SBATCH -o Output/outfile-%J       # Log standard output
+#SBATCH -e Output/errorfile-%J     # Log standard error
+
+# Environment setup
+export FFTW_DIR='/opt/sw/rev/23.12/linux-scientific7-cascadelake/gcc-9.5.0/fftw-3.3.8-62yh7t/lib'
+export LD_LIBRARY_PATH=$FFTW_DIR:$LD_LIBRARY_PATH
+
+module load openmpi/4.1.6 gcc/9.5.0 fftw/3.3.10 hdf5/1.14.3 python/3.9.0
+
+# Clean up previous builds
+./clean.sh
+
+# Run the simulation
+mpirun -n 1 ./AxNyx3d.gnu.MPI.ex inputs_test

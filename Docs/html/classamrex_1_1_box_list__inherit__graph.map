@@ -1,0 +1,4 @@
+<map id="amrex::BoxList" name="amrex::BoxList">
+<area shape="rect" id="node1" title="A class for managing a List of Boxes that share a common IndexType. This class implements operations ..." alt="" coords="17,5,128,32"/>
+<area shape="rect" id="node2" href="$classamrex_1_1_box_domain.html" title="A List of Disjoint Boxes. A BoxDomain is a BoxList with the restriction that Boxes in the list are di..." alt="" coords="5,80,140,107"/>
+</map>
