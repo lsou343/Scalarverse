@@ -14,7 +14,6 @@
 #include <AMReX_Geometry.H>
 #include <AMReX_MultiFab.H>
 #include <AMReX_Vector.H>
-#include <AMReX_AmrLevel.H>
 
 #include <iostream>
 
@@ -39,12 +38,11 @@ public:
 
   // Enums for managing fields
   enum class Fields : unsigned char {
-    Density,
     PhiGrav,     // Gravitational potential
     PhiGravv,    // Derivative of Newtonian potential
-//    GradPhi_X,   // Gradient of the gravitational potential in X
-//    GradPhi_Y,   // Gradient of the gravitational potential in Y
-//    GradPhi_Z    // Gradient of the gravitational potential in Z // LSR -- might put these back in later as derived fields
+    GradPhi_X,   // Gradient of the gravitational potential in X
+    GradPhi_Y,   // Gradient of the gravitational potential in Y
+    GradPhi_Z    // Gradient of the gravitational potential in Z
   };
 
   enum class StateType : unsigned char {
@@ -94,13 +92,18 @@ protected:
   virtual void average_down() override;
 
   // density initialization
-//  virtual void
-//  prob_initdata_pos(int i, int j, int k, const amrex::Array4<double> &fields,
-//                    const amrex::GeometryData &geomdata,
-//                    const amrex::GpuArray<double, 10> &prob_param) override;
+  virtual void
+  prob_initdata_pos(int i, int j, int k, const amrex::Array4<double> &fields,
+                    const amrex::GeometryData &geomdata,
+                    const amrex::GpuArray<double, 10> &prob_param) override;
 
+  virtual void
+  prob_initdata_mom(int i, int j, int k,
+                    amrex::Array4<amrex::GpuComplex<amrex::Real>> const &fields,
+                    const amrex::GeometryData &geomdata,
+                    const amrex::GpuArray<double, 10> &prob_param) override;
 
-  void outputPotentialSpectrum(const std::string &dir);  // LSR - uncommented this -- recommented cos don't think we need it
+//  void outputPotentialSpectrum(const std::string &dir);  // LSR - uncommented this -- recommented cos don't think we need it
 };
 
 #endif // AX_TEST_GRAV_H

@@ -13,6 +13,8 @@ gravity.gravity_type = PoissonGrav      #
 gravity.no_sync      = 1                # Query no_sync flag
 gravity.no_composite = 1                # Query no_composite flag
 gravity.show_timings = 1 
+gravity.Gconst = 1			# Gravitational constant
+gravity.calc_steps = 1			# How often to calculate Phi
 
 # New KG Axioax inputs  --PH
 # ####################### #
@@ -35,8 +37,8 @@ KG.KG0                    = .0232524067 # As per the LatticeEasy T-model.
 # ####################### #
 
 # ## End condition
-# max_step                 = 1000          # Maximum number of level 0 steps 
-stop_time                 = 150.0      # Final simulation time
+ max_step                 = 100000          # Maximum number of level 0 steps 
+# stop_time                 = 150.0      # Final simulation time
 # comov.final_a               = 1.05188 # this will abort the simulation if final_a is reached before stop_time or max_step
 # comov.final_efold       = 0.03
 
@@ -99,18 +101,18 @@ amr.EdensRel.start_time     = 2.5
 
 # ## Checkpoint files
 amr.check_file            = Outputs/chk              # The prefix of checkpoint folder names
-amr.check_int             = 50              # The interval of steps at which to save checkpoints
+amr.check_int             = 10000              # The interval of steps at which to save checkpoints
 
 # ## Plotfiles
 amr.plot_file             = Outputs/plt              # The prefix of plot folder names
-amr.plot_int              = 50               # The interval of steps at which to save plots 
+amr.plot_int              = 10000               # The interval of steps at which to save plots 
 
 # ## Log file 
 amr.data_log = Outputs/runlog                        
 amr.grid_log = Outputs/grdlog           
 
 # ## Output field names
-amr.plot_vars = KGfpr KGfVpr phi_grav           # Primitive fields output in plot folders/checkpoints # LSR -- density removed
+amr.plot_vars = KGfpr KGfVpr density #phi_grav			# Primitive fields output in plot folders/checkpoints
                                                         # KGfpr and KGfVpr are the field and time-derivative in program units
 amr.derive_plot_vars = KGf KGfv KGfdens Edens           # Derived fields output in plot folders/checkpoints 
                                                         # Options are: KGf, KGfv (field and time-dv in Natural units), 

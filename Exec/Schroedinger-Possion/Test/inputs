@@ -23,7 +23,7 @@ mg.bottom_solver = 1                    # Query bottom solver type
 nyx.comoving_OmM = 1.0
 nyx.comoving_OmB = 0.0
 nyx.comoving_h = 0.0 #0.016922661184715315  # 0.022300028700571035 (used for original run)
-nyx.initial_z = 0.0001 #53.598150033144236  # = exp(4) - 1
+nyx.initial_z = 0.1 #0.0001 #53.598150033144236  # = exp(4) - 1
 nyx.final_z = 0.0
 # timestepping for comoving eos
 nyx.relative_max_change_a = 0.01    # max change in scale factor
@@ -57,7 +57,7 @@ SCH.SCH0                    = 1.0e3 # Initial amplitude of the field
 # ####################### #
 
 # ## End condition
-max_step                 = 1 #10000 # Maximum number of level 0 steps 
+max_step                 = 100 # Maximum number of level 0 steps 
 # stop_time                 = 2.0      # Final simulation time
 # stop_time                 = 1000.0      # Final simulation time
 # ax.final_a                           # Final value of a

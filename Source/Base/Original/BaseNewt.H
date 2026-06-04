@@ -36,7 +36,8 @@ public:
 
   BaseNewt(amrex::Amr &papa, int lev, const amrex::Geometry &level_geom,
            const amrex::BoxArray &ba, const amrex::DistributionMapping &dm,
-           amrex::Real time, int dens = 0, int stype = 0, int ptype = 1);
+           amrex::Real time, int dens = 0, int stype = 0, int ptype = 1,
+           int gtype = 2);
 
   ~BaseNewt();
 

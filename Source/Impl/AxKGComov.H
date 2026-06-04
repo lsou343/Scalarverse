@@ -2,6 +2,8 @@
 #define _AX_KG_COMOV_H_
 
 #include <BaseKG.H>
+#include <Comoving_Full.H>
+#include <KG_compute_models.H>
 
 /////////////////////////////////////////////////////////////////////
 //    Implementation of BaseKG to solve the KG equation for one    //

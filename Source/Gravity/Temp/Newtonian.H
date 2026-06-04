@@ -135,8 +135,6 @@ public:
                                     int ngrow_for_solve,
                                     int use_previous_phi_as_guess = 0);
 
-  // LSR -- TODO: add density solvers here as well
-
   // Performs the actual multilevel solve
   void actual_multilevel_solve(
       int level, int finest_level,

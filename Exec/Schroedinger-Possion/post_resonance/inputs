@@ -50,7 +50,7 @@ SCH.Phase0                = 0.0         # Initial phase of the field
 SCH.SCH0                    = 1.0e5 # Initial amplitude of the field
 SCH.sigma                 = 0.1         # Width of the gaussian profile
 # if initialized from KG field
-KG.KGinitDirName = /scratch-scc/projects/mthesis_niki_suckau/scalarverse/Exec/Inflation/ComovSingleField/Output_64_M0.05_a0.5/plt94000
+# KG.KGinitDirName = /scratch-scc/projects/mthesis_niki_suckau/scalarverse/Exec/Inflation/ComovSingleField/Output_64_M0.05_a0.5/plt94000
 
 KG.KGm = 1.4002212706340354e-05  # in units of Planck mass (m_pl, not the reduced Planck mass)
 KG.KGA = 6.649758554848538 # in 1/m_pl 
@@ -63,7 +63,7 @@ KG.KGs = 1.0 # dimless
 # ####################### #
 
 # ## End condition
-max_step                 = 1 #10000 # Maximum number of level 0 steps 
+max_step                 = 1 # Maximum number of level 0 steps 
 # stop_time                 = 10.0      # Final simulation time
 # ax.final_a                           # Final value of a
 # ax.final_z                           # Final value of z
@@ -121,8 +121,8 @@ amr.blocking_factor       = 1 1 1 1 #32                # Dimension of grids is a
 
 # ## Diagnostics & verbosity
 amr.v                     = 0                # Verbosity ranges from 0 (least) to 3 (most)
-# amr.grid_log              = Output/grdlog           # Name of grid logging fileamr
-amr.grid_log              = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse_gaussian/Output/grdlog           # Name of grid logging fileamr
+amr.grid_log              = Output/grdlog           # Name of grid logging fileamr
+# amr.grid_log              = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse_gaussian/Output/grdlog           # Name of grid logging fileamr
 
 # ## Refinement / regridding (Not used in KG yet)
 amr.max_level             = 0                # Maximum refinement level number allowed
@@ -169,7 +169,7 @@ amr.data_log = Output/runlog                        # The name of the run log
 # amr.data_log = /mnt/vast-standard/home/niki.suckau/u10965/analysis/scalarverse_gaussian/Output/runlog                        # The name of the run log
 
 # ## Output field names
-amr.plot_vars = SCHf_Re SCHf_Im Dens Phase phi_grav                 # Primitive fields output in plot folders/checkpoints
+amr.plot_vars = SCHf_Re SCHf_Im Dens Phase phi_grav grav_x grav_y                 # Primitive fields output in plot folders/checkpoints
 # amr.derive_plot_vars = SCHf_Re SCHf_Im #SCHf SCHfv SCHfdens             # Derived fields output in plot folders/checkpoints 
 
 # ## Other

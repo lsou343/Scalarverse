@@ -31,7 +31,7 @@ BaseNewt::BaseNewt() { BL_PROFILE("BaseNewt::BaseNewt()"); }
 BaseNewt::BaseNewt(amrex::Amr &papa, int lev, const amrex::Geometry &level_geom,
                    const amrex::BoxArray &ba,
                    const amrex::DistributionMapping &dm, amrex::Real time,
-                   int dens, int stype, int ptype)
+                   int dens, int stype, int ptype, int gtype)
     : AxKGComov(papa, lev, level_geom, ba, dm, time) {
   BL_PROFILE("BaseNewt::BaseNewt(Amr)");
 
@@ -40,7 +40,7 @@ BaseNewt::BaseNewt(amrex::Amr &papa, int lev, const amrex::Geometry &level_geom,
     if (!gravity) {
       // std::cout << "Initializing Gravity object." << std::endl;
       gravity = new Gravity(parent, parent->finestLevel(), &phys_bc, dens,
-                            stype, ptype);
+                            stype, ptype, gtype);
       if (!gravity) {
         amrex::Abort("Fatal Error: Gravity object allocation failed!");
       }

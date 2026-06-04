@@ -1,7 +1,5 @@
 // #include <AxKG.H>
 #include <AxKGComov.H>
-#include <Comoving_Full.H>
-#include <KG_compute_models.H>
 // #include <AMReX_ParallelDescriptor.H>
 
 AxKGComov::~AxKGComov() {}

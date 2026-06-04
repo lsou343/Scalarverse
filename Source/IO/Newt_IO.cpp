@@ -21,7 +21,7 @@ void AxNewt::write_info() {
   int rlp = AxNewt::runlog_precision;
 
   if (ndatalogs > 0) {
-    amrex::Real time = state[getState(StateType::State_Type)]
+    amrex::Real time = state[getState(StateType::Density_Type)]
                            .curTime(); // PhiGrav_Type? Gravity_Type?
     amrex::Real dt = parent->dtLevel(0);
     int nstep = parent->levelSteps(0);
@@ -29,16 +29,10 @@ void AxNewt::write_info() {
     int gridsize = geom.Domain().length(0) * geom.Domain().length(1) *
                    geom.Domain().length(2);
 
-    amrex::MultiFab &densitygrav_old =
-        get_level(level).get_new_data(getState(StateType::State_Type));
-    amrex::MultiFab &phigrav_old =
-        get_level(level).get_new_data(getState(StateType::PhiGrav_Type));
-    amrex::MultiFab &gradphi_old =
-        get_level(level).get_new_data(getState(StateType::Gravity_Type));
+//    amrex::MultiFab &phigrav_old =
+//        get_level(level).get_new_data(getState(StateType::PhiGrav_Type));
 
-    amrex::Real avdensity = densitygrav_old.sum() / gridsize;
-    amrex::Real avphigrav = phigrav_old.sum() / gridsize;
-    amrex::Real avgradphi = gradphi_old.sum() / gridsize;
+//    amrex::Real avphigrav = phigrav_old.sum() / gridsize;
 
     if (amrex::ParallelDescriptor::IOProcessor()) {
       std::ostream &data_log = parent->DataLog(0);
@@ -46,17 +40,14 @@ void AxNewt::write_info() {
         data_log << std::setw(8) << "#  nstep";
         data_log << std::setw(14) << "          time";
         data_log << std::setw(14) << "         dt";
-        data_log << std::setw(14) << "  <Density>";
-        data_log << std::setw(14) << "     <PhiGrav>";
-        data_log << std::setw(14) << " <|GradPhiGrav|>";
+//        data_log << std::setw(14) << "     <PhiGrav>";
+//        data_log << std::setw(14) << " <|GradPhiGrav|>";
         data_log << std::endl;
       }
       data_log << std::setw(8) << nstep;
       data_log << std::setw(14) << std::setprecision(rlp) << time * time_unit;
       data_log << std::setw(14) << std::setprecision(rlp) << dt * time_unit;
-      data_log << std::setw(14) << std::setprecision(rlp) << avdensity;
-      data_log << std::setw(14) << std::setprecision(rlp) << avphigrav;
-      data_log << std::setw(14) << std::setprecision(rlp) << avgradphi;
+//      data_log << std::setw(14) << std::setprecision(rlp) << avphigrav;
       data_log << std::endl;
     }
   }

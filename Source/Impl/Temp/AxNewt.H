@@ -99,6 +99,11 @@ protected:
 //                    const amrex::GeometryData &geomdata,
 //                    const amrex::GpuArray<double, 10> &prob_param) override;
 
+  virtual void
+  prob_initdata_mom(int i, int j, int k,
+                    amrex::Array4<amrex::GpuComplex<amrex::Real>> const &fields,
+                    const amrex::GeometryData &geomdata,
+                    const amrex::GpuArray<double, 10> &prob_param) override;
 
   void outputPotentialSpectrum(const std::string &dir);  // LSR - uncommented this -- recommented cos don't think we need it
 };

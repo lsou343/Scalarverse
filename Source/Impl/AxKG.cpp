@@ -125,7 +125,7 @@ void AxKG::initData()
         {
             const amrex::Box& bx = mfi.tilebox();
             const auto fab_KG_new=KG_new.array(mfi);
-            prob_initdata_pos_on_box(bx, fab_KG_new, geomdata, prob_param); // This function is defined in Prob.H. --PH
+            prob_initdata_pos_on_box(bx, fab_KG_new, geomdata, prob_param); // This function is defined in Prob.H. --PH // LSR -- actually defined in BaseAx.H. Initial position data on box
         }
         KG_new.FillBoundary(geom.periodicity());
     }
@@ -133,7 +133,7 @@ void AxKG::initData()
     {
 #ifdef BL_USE_MPI
 	printf("\n\nTest1\n\n");
-        prob_initdata_mom_on_mf(KG_new, geom, prob_param);
+        prob_initdata_mom_on_mf(KG_new, geom, prob_param);  // LSR -- similarly defined in BaseAx.H. Initial momentum data on multifab
         printf("\n\nTest2\n\n");
         KG_new.plus(1., 0, 1);  // (val, comp, ncomp): Adds the value val to ncomp components starting at comp. Note f_pr starts at 1 and f_pr = f/KG0.
         KG_new.FillBoundary(geom.periodicity());
@@ -223,10 +223,13 @@ void AxKG::variable_setup()
     derive_lst.add("KGfdens", amrex::IndexType::TheCellType(), 1, Derived::derKGfdens, Derived::grow_box_by_one);
     derive_lst.addComponent("KGfdens", desc_lst, getState(StateType::KG_Type), getField(Fields::KGf), 1);
 
+//#ifndef NEWT // LSR -- TODO: implement this so that we don't double up
     // Energy density (in real units)
-    derive_lst.add("Edens", amrex::IndexType::TheCellType(), 1, Derived::derEdens, Derived::grow_box_by_one);
+    derive_lst.add("Edens", amrex::IndexType::TheCellType(), 1, Derived::derEdens, Derived::grow_box_by_one); 	// LSR -- this is being calculated at every step by Newtonian but suppose there's no harm 
+    														// in this being here as well
     derive_lst.addComponent("Edens", desc_lst, getState(StateType::KG_Type), getField(Fields::KGf), 1);
     derive_lst.addComponent("Edens", desc_lst, getState(StateType::KG_Type), getField(Fields::KGfv), 1);
+//#endif
     derive_lst.add("Egrad", amrex::IndexType::TheCellType(), 1, Derived::derEgrad, Derived::grow_box_by_one);
     derive_lst.addComponent("Egrad", desc_lst, getState(StateType::KG_Type), getField(Fields::KGf), 1);
     derive_lst.addComponent("Egrad", desc_lst, getState(StateType::KG_Type), getField(Fields::KGfv), 1);
@@ -236,7 +239,8 @@ void AxKG::variable_setup()
     derive_lst.add("Ekin", amrex::IndexType::TheCellType(), 1, Derived::derEkin, Derived::grow_box_by_one);
     derive_lst.addComponent("Ekin", desc_lst, getState(StateType::KG_Type), getField(Fields::KGf), 1);
     derive_lst.addComponent("Ekin", desc_lst, getState(StateType::KG_Type), getField(Fields::KGfv), 1);
-
+    
+    printf("\n\nAxKG::variable_setup done\n\n");
 }
 
 // Helper functions to map fields and states. This will be very useful when combining different types of simulations (e.g., KG, gravity, particles, etc.)

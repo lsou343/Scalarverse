@@ -38,6 +38,7 @@
 #endif // NEWT
 #endif // not SCHROEDINGER
 #endif // GRAV
+
 using namespace amrex;
 
 class AxBld : public LevelBld {
