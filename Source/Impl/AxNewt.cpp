@@ -163,12 +163,12 @@ void AxNewt::initData() {
   // 3. Caclulate initial Phi value
   // 4. Set Phidot = 0
 
-  MultiFab &density_new = get_density();  // LSR -- get_density returns zero at all points on the grid which is obviously not ideal. Need to figure out a way to have it accurately find edens
+  amrex::MultiFab& density_new = get_density();  // LSR -- get_density returns zero at all points on the grid which is obviously not ideal. Need to figure out a way to have it accurately find edens
   amrex::MultiFab&  KG_new = get_level(level).get_new_data(AxKG::getState(AxKG::StateType::KG_Type));  // LSR -- TODO: figure out if I need new or old. Think it's new but double check - no need to recalculate values if that is what new does
 
   // ALSO: may not work generally because it relies too heavily on KGComov - need a solution that is independent of KGComov
   
-  const amrex::Real invdeltsq = 1.0;// / geomdata.CellSize(0) / geomdata.CellSize(0);
+  const amrex::Real invdeltsq = 1.0 / geom.CellSizeArray[0] / geom.CellSizeArray[0]; // NEW TODO: geom instead of geomdata. Also see if just dx from AxKG works (suspect no)
   
   amrex::Real tmp_grad = 0., tmp_pot = 0., tmp_kin = 0.;
   for (amrex::MFIter mfi(KG_new, false); mfi.isValid(); ++mfi) {
@@ -177,13 +177,14 @@ void AxNewt::initData() {
 
     amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
       
-      tmp_kin += 1;
-      tmp_kin -= 1;
-      tmp_kin += 1;
+      // tmp_pot = Models::compute_model_quantity(arr, comp, a, ap, app, quantity) // NEW TODO: Figure this out
+      tmp_kin = 1.;
+
     });
-    
+    // NEW TODO: In BaseAx.H, what is a) cMultifab, b) FillK, c) fab_new, and how can I use equivalents here?
+    // Note: I'm going to keep everything in here for now but eventually I will create init_density() and init_phi() functions in Newtonian.H or Newtonian.cpp
   }
-  Comoving::add_to_rho(tmp_grad, tmp_pot, tmp_kin);
+  Comoving::add_to_rho(tmp_grad, tmp_pot, tmp_kin); // This doesn't work the way I hoped
   
   // Follow up: I'm setting density_new to be the density but is that actually getting saved to the output? Probably not
   
