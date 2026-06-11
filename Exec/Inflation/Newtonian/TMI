@@ -37,7 +37,7 @@ KG.KG0                    = .0232524067 # As per the LatticeEasy T-model.
 # ####################### #
 
 # ## End condition
- max_step                 = 100000          # Maximum number of level 0 steps 
+ max_step                 = 10000          # Maximum number of level 0 steps 
 # stop_time                 = 150.0      # Final simulation time
 # comov.final_a               = 1.05188 # this will abort the simulation if final_a is reached before stop_time or max_step
 # comov.final_efold       = 0.03

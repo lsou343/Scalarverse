@@ -82,6 +82,9 @@ protected:
   // In Impl
   virtual void init(amrex::AmrLevel &old);
   virtual void init();
+  
+  // virtual void init_rho(amrex::MultiFab &density, amrex::MultiFab &field, amrex::Geometry const &geom);  // LSR -- Concepts really
+  // virtual void init_phi();
 
   // In IO - LSR, taken from AxKGComov.H
   // THESE NEED TO BE INCLUDED, BUT STATIC FUNCTIONS CAN'T BE FORCED IN C++, SO HEADS-UP, READ THE COMMENTS

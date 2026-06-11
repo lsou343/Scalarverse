@@ -132,9 +132,7 @@ void AxKG::initData()
     else
     {
 #ifdef BL_USE_MPI
-	printf("\n\nTest1\n\n");
         prob_initdata_mom_on_mf(KG_new, geom, prob_param);  // LSR -- similarly defined in BaseAx.H. Initial momentum data on multifab
-        printf("\n\nTest2\n\n");
         KG_new.plus(1., 0, 1);  // (val, comp, ncomp): Adds the value val to ncomp components starting at comp. Note f_pr starts at 1 and f_pr = f/KG0.
         KG_new.FillBoundary(geom.periodicity());
 #endif
