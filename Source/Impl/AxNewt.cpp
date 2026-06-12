@@ -164,7 +164,7 @@ void AxNewt::initData() {
   // 4. Set Phidot = 0. We can do this for two reasons. First, we typically choose program variables such that phi' = 0 for stability, and hence Phi' must also be zero. Second, it is assumed that Phi << phi and Phi' << H, so initially Phi' must be small since Phi and H will be as well.
 
   amrex::MultiFab& density_new = get_density();  // LSR -- get_density returns zero at all points on the grid so need to update this
-  amrex::MultiFab&  KG_new = get_level(level).get_new_data(AxKG::getState(AxKG::StateType::KG_Type));
+  amrex::MultiFab&  KG_new = get_new_data(AxKG::getState(AxKG::StateType::KG_Type));  // LSR -- get_level(level).get_new_data -> get_new_data
 
   // ALSO: may not work generally because it relies too heavily on KGComov - need a solution that is independent of KGComov
   
@@ -188,7 +188,7 @@ void AxNewt::initData() {
       amrex::Real a = Comoving::get_comoving_a(),
                   ap = Comoving::get_comoving_ap();
 #else
-      amrex::Real a = 1.,	// TODO: need a better method here but will be fine for now
+      amrex::Real a = 1.,	// TODO: need a better method here but will be fine for now. Aligned with elsewhere in the code though
                   ap = 0.;
 #endif
       amrex::Real H = ap / a;  // LSR -- LatticeEasy doesn't call this H since H is a'/a, not ap/a but semantic issue
@@ -197,11 +197,15 @@ void AxNewt::initData() {
                       (arr(i+1, j, k, 0) - arr(i-1, j, k, 0))*(arr(i+1, j, k, 0) - arr(i-1, j, k, 0)) +
                       (arr(i, j+1, k, 0) - arr(i, j-1, k, 0))*(arr(i, j+1, k, 0) - arr(i, j-1, k, 0)) +
                       (arr(i, j, k+1, 0) - arr(i, j, k-1, 0))*(arr(i, j, k+1, 0) - arr(i, j, k-1, 0))
-                    )*invdeltsq; // 6 point stencil in 3D - breaking on one boundary (i-direction) - whichever is the z axis. Suspect it's to do with the multifab box, maybe not looping around properly? Fields are definitely fine by themselves so something odd is happening with the way this is defined
+                    )*invdeltsq; // 6 point stencil in 3D - breaking on one boundary (k-direction, or along the z-axis). Suspect it's to do with the multifab box, maybe not looping around properly? Fields are definitely fine by themselves so something odd is happening with the way this is defined. arr(i, j, -1) = 0 (and presumably true for arr(i, j, 128) as well).
                     // Maybe we can't use mesh refinement with this? Not easily at least - should be doable with ghost cells but may need some interpolation.
                     // New guess: something to do with splitting across processors? This definitely breaks the code so will eventually need to figure that out
 
-      tmp_pot = Models::compute_model_quantity({arr(i,j,k,0)}, 0, a, ap, 0 /* app doesn't matter and neither does ap? So why are they included? */ , Models::Quant::V); // NEW TODO: Figure this out
+//      amrex::Real *tmp = Models::compute_rho(arr, i, j, k, AxKG::getField(AxKG::Fields::KGf), invdeltsq, a);
+
+//      tmp_grad += tmp[0];
+
+      tmp_pot = Models::compute_model_quantity({arr(i,j,k,0)}, 0, a, 0., 0. /* app doesn't matter and neither does ap? So why are they included? */ , Models::Quant::V); // NEW TODO: Figure this out
 
       tmp_kin += 0.5*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv));
       tmp_kin -= AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H;
@@ -211,7 +215,7 @@ void AxNewt::initData() {
       amrex::Real rho = (tmp_kin + pow(a, -2.*AxKG::s-2.)*tmp_grad + tmp_pot);
       rho = tmp_grad;
 //      rho *= coef;
-//      if (i==0 && j ==0) printf("\n\n%e\n\n", arr(i,j,k));
+//      if (i==0 && j==0) printf("\n\n%e\n\n", arr(i,j,k));
       fab_new(i,j,k, AxNewt::getField(AxNewt::Fields::Density)) = rho; // LSR -- this works! Now just figure out above
 
     });

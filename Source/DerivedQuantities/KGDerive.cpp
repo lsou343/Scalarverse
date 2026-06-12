@@ -90,7 +90,7 @@ void Derived::derEdens (const amrex::Box& bx, amrex::FArrayBox& derfab, int dcom
                       (dat(i+1,j,k,0) - dat(i-1, j, k, 0))*(dat(i+1,j,k,0) - dat(i-1, j, k, 0)) +
                       (dat(i,j+1,k,0) - dat(i, j-1, k, 0))*(dat(i,j+1,k,0) - dat(i, j-1, k, 0)) +
                       (dat(i,j,k+1,0) - dat(i, j, k-1, 0))*(dat(i,j,k+1,0) - dat(i, j, k-1, 0))
-                    )*invdeltsq; 
+                    )*invdeltsq; // LSR -- why not tmp[0]?
         
 
         tmp_kin += 0.5*dat(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*dat(i,j,k,AxKG::getField(AxKG::Fields::KGfv));
