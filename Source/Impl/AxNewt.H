@@ -15,6 +15,8 @@
 #include <AMReX_MultiFab.H>
 #include <AMReX_Vector.H>
 #include <AMReX_AmrLevel.H>
+#include <AMReX_MLMG.H> // LSR -- temp
+#include <AMReX_MLPoisson.H> // LSR -- temp
 
 #include <iostream>
 

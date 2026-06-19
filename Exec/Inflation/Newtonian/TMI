@@ -112,7 +112,7 @@ amr.data_log = Outputs/runlog
 amr.grid_log = Outputs/grdlog           
 
 # ## Output field names
-amr.plot_vars = KGfpr KGfVpr density #phi_grav			# Primitive fields output in plot folders/checkpoints
+amr.plot_vars = KGfpr KGfVpr density PhiGrav PhiGravv			# Primitive fields output in plot folders/checkpoints
                                                         # KGfpr and KGfVpr are the field and time-derivative in program units
 amr.derive_plot_vars = KGf KGfv KGfdens Edens           # Derived fields output in plot folders/checkpoints 
                                                         # Options are: KGf, KGfv (field and time-dv in Natural units), 

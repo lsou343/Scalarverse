@@ -146,12 +146,9 @@ void AxNewt::init() {
 // Initialize all data
 void AxNewt::initData() {
   BL_PROFILE("AxNewt::initData()");
-  printf("\n\n AxNewt::initData() \n\n");
 #ifdef INFLATION
   AxKGComov::initData();
-  printf("\n\n AxKGComov::initData() \n\n"); // LSR -- debug tool
 #else
-  printf("\n\n AxKG::initData() \n\n");
   AxKG::initData()
 #endif
   
@@ -159,26 +156,36 @@ void AxNewt::initData() {
 
   // Regardless of pos or mom, we have pos field values now
   // 1. Find how to call them - DONE
-  // 2. Set density using phidot^2 + grad^2 phi + V(phi) - IN PROGRESS
+  // 2. Set density using phidot^2 + grad^2 phi + V(phi) - DONE
+  // 2.5 Read in parameters to do with gravity (in particular gconst)
   // 3. Caclulate initial Phi value
   // 4. Set Phidot = 0. We can do this for two reasons. First, we typically choose program variables such that phi' = 0 for stability, and hence Phi' must also be zero. Second, it is assumed that Phi << phi and Phi' << H, so initially Phi' must be small since Phi and H will be as well.
 
-  amrex::MultiFab& density_new = get_density();  // LSR -- get_density returns zero at all points on the grid so need to update this
+  amrex::BoxArray ba;
+  amrex::DistributionMapping dm;
+
   amrex::MultiFab&  KG_new = get_new_data(AxKG::getState(AxKG::StateType::KG_Type));  // LSR -- get_level(level).get_new_data -> get_new_data
+  amrex::MultiFab& density_new = get_density();  // LSR -- get_density returns zero at all points on the grid so need to update this
+  amrex::MultiFab& PhiGrav_new = get_new_data(getState(StateType::PhiGrav_Type));
+  PhiGrav_new.setVal(0.);
 
   // ALSO: may not work generally because it relies too heavily on KGComov - need a solution that is independent of KGComov
   
   // init_rho(density_new, KG_new, geom);
-  
-  const amrex::Real *dx = geom.CellSize(); 
-  const amrex::Real invdeltsq = 1.0 / dx[0] / dx[0];
-  
-  amrex::BoxArray ba;
-  amrex::DistributionMapping dm;
-  // amrex::MultiFab dens_fill(ba, dm, 1 /* number of components */, 0); // LSR -- unnecessary, fillK from BaseAx is for Fourier space components (I think)
-  
-  for (amrex::MFIter mfi(density_new, false); mfi.isValid(); ++mfi) {
-    amrex::Array4<amrex::Real> const &arr = KG_new.array(mfi);
+  const amrex::Real *dx = geom.CellSize();
+  const amrex::Real invdeltsq = 1.0 / dx[0] / dx[0];  // LSR -- what happens with mesh refinement here?
+  amrex::Real rho_avg = 0., volume = pow(dx[0] * AMREX_SPACEDIM, 3);
+  amrex::Real Gconst;
+  amrex::ParmParse pp_grav("gravity");
+  pp_grav.query("Gconst", Gconst);
+
+  // TODO: Tidy this section up
+  amrex::MultiFab KG(KG_new.boxArray(), KG_new.DistributionMap(), 2, 1);  // LSR -- this is very annoying but the only fix I could find for the periodic boundary condition problem below
+  KG.ParallelCopy(KG_new);
+  KG.FillBoundary(geom.periodicity());
+
+  for (amrex::MFIter mfi(density_new, false); mfi.isValid(); ++mfi) { // LSR -- does this even make sense for initial conditions?
+    amrex::Array4<amrex::Real> const &arr = KG.array(mfi);
     const amrex::Box &bx = mfi.tilebox();
     const auto fab_new = density_new.array(mfi);
 
@@ -213,17 +220,23 @@ void AxNewt::initData() {
 
       const amrex::Real coef = (AxKG::B*AxKG::B/AxKG::A/AxKG::A);
       amrex::Real rho = (tmp_kin + pow(a, -2.*AxKG::s-2.)*tmp_grad + tmp_pot);
-      rho = tmp_grad;
-//      rho *= coef;
+//      rho = tmp_grad;
+      rho *= coef;
+      rho_avg += rho / volume;
 //      if (i==0 && j==0) printf("\n\n%e\n\n", arr(i,j,k));
       fab_new(i,j,k, AxNewt::getField(AxNewt::Fields::Density)) = rho; // LSR -- this works! Now just figure out above
 
     });
-    // Note: I'm going to keep everything in here for now but eventually I will create init_density() and init_phi() functions in Newtonian.H or Newtonian.cpp. Future Leon: or I could just... not
+    // Note: I'm going to keep everything in here for now but eventually I may create init_density() and init_phi() functions in Newtonian.H or Newtonian.cpp
 
-    // Note for future me: this segfaults *sometimes*. Why?
-
+    // Note for future me: the above segfaults *sometimes*. Why?
   }
+  amrex::MultiFab rhs(ba, dm, 1, 1);
+  MultiFab::Copy(rhs, density_new, 0, 0, 1, 1);
+  rhs.plus(-rho_avg, 0, 1, 0);
+  rhs.mult(4.0 * M_PI * Gconst, 0);
+
+  MultiFab::Copy(PhiGrav_new, rhs, 0, 0, 1, 1);
 
 }
 
@@ -286,24 +299,35 @@ void AxNewt::variable_setup() {
   bndryfunc.setRunOnGPU(true);
 
   Interpolater *interp;
-  interp = &cell_cons_interp;
+  interp = &amrex::cell_cons_interp;
 
   // Establish the additional workhorse fields
   std::cout << "Adding descriptors to desc_lst..." << std::endl;
 
   desc_lst.addDescriptor(getState(StateType::Density_Type),
                          amrex::IndexType::TheCellType(),
-                         amrex::StateDescriptor::Point, 1, 1 /* nfields() */, &cell_cons_interp,
+                         amrex::StateDescriptor::Point, 1, 1 /* nfields() */, interp,
+                         state_data_extrap, store_in_checkpoint);
+
+  desc_lst.addDescriptor(getState(StateType::PhiGrav_Type),
+                         amrex::IndexType::TheCellType(),
+                         amrex::StateDescriptor::Point, 0 /* nextra - what is this? 0 for KGf and KGfv */, nFields(), interp,
                          state_data_extrap, store_in_checkpoint);
 
   // Set components
   std::cout << "Setting components..." << std::endl;
   set_scalar_bc(bc, phys_bc);
+
+  // Establish fields
   
   desc_lst.setComponent(getState(StateType::Density_Type),
                         getField(Fields::Density), "density", bc, bndryfunc);
+  desc_lst.setComponent(getState(StateType::PhiGrav_Type),
+                        getField(Fields::PhiGrav), "PhiGrav", bc, bndryfunc);
+  desc_lst.setComponent(getState(StateType::PhiGrav_Type),
+                        getField(Fields::PhiGravv), "PhiGravv", bc, bndryfunc);
 
-  // LSR -- TODO: add gravity stuff
+  // TODO: add derived fields with non-program units
 
 }
 
@@ -327,10 +351,12 @@ int AxNewt::getField(Fields f) {
   case Fields::Density:
     field = 0;
     break;
-//case Fields::PhiGrav:
-//  field = 0;
-//case Fields::PhiGravv:
-//  field = 1;
+  case Fields::PhiGrav:
+    field = 0;
+    break;
+  case Fields::PhiGravv:
+    field = 1;
+    break;
   }
   if (field == -1) {
     std::cerr << "Invalid field requested!" << std::endl;
@@ -347,12 +373,9 @@ int AxNewt::getState(StateType st) {
   case StateType::Density_Type:
     state = 1;
     break;
-  case StateType::PhiGrav_Type:
+  case StateType::PhiGrav_Type:	// LSR -- Do we want to have one state for AxNewt with three components? Keeping density and gravity separate for now but worth considering
     state = 2;
     break;
-//  case StateType::PhiGravv_Type: // LSR -- might not actually want this, instead fold into PhiGrav_Type as an extra component
-//    state = 3;
-//    break;
   }
   if (state == -1) {
     std::cerr << "Invalid state requested!" << std::endl;
@@ -363,7 +386,6 @@ int AxNewt::getState(StateType st) {
 
 // Retrieving the general density field and override it with initial density
 // field from initData() - LSR -- Why? Why not fold this into init?
-// LSR -- also think this won't work - currently no data to get. Need somewhere where density is being calculated and updated.
 MultiFab &AxNewt::get_density(bool old) {
   if (old) {
     return get_old_data(AxNewt::getState(AxNewt::StateType::Density_Type));
