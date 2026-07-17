@@ -116,6 +116,7 @@ AxNewt::~AxNewt() {
 //
 void AxNewt::init(AmrLevel &old) {
   AxKG::init(old);
+  printf("\n\ninit(old)\n\n");
 
   amrex::MultiFab&  density_new = get_new_data(getState(StateType::Density_Type));
 
@@ -132,6 +133,7 @@ void AxNewt::init(AmrLevel &old) {
 //
 void AxNewt::init() {
   AxKG::init();
+  printf("\n\ninit\n\n");
 
   amrex::Real cur_time  = static_cast<AxNewt*>(&get_level(level-1))->state[State_for_Time].curTime();
 
@@ -151,15 +153,16 @@ void AxNewt::initData() {
 #else
   AxKG::initData()
 #endif
-  
+  printf("\n\ninitData\n\n");
   // LSR -- So now the field and field derivative are ready, next step is add density... how? Schroedinger defines it initially and then finds its value in timestep, is this the way forward?
 
   // Regardless of pos or mom, we have pos field values now
   // 1. Find how to call them - DONE
   // 2. Set density using phidot^2 + grad^2 phi + V(phi) - DONE
-  // 2.5 Read in parameters to do with gravity (in particular gconst)
-  // 3. Caclulate initial Phi value
-  // 4. Set Phidot = 0. We can do this for two reasons. First, we typically choose program variables such that phi' = 0 for stability, and hence Phi' must also be zero. Second, it is assumed that Phi << phi and Phi' << H, so initially Phi' must be small since Phi and H will be as well.
+  // 2.5 Read in parameters to do with gravity (in particular gconst) - DONE?
+  // 3. Caclulate initial Phi value - DONE
+  // 4. Set Phidot = 0. We can do this for two reasons. First, we typically choose program variables such that phi' = 0 for stability, and hence Phi' must also be zero. Second, it is assumed that Phi << phi and Phi' << H, so initially Phi' must be small since Phi and H will be as well. - DONE, but maybe we can just calculate Phidot anyway? WIP
+  // 5. Do we need to calculate time stepping here or elsewhere?
 
   amrex::BoxArray ba;
   amrex::DistributionMapping dm;
@@ -174,7 +177,7 @@ void AxNewt::initData() {
   // init_rho(density_new, KG_new, geom);
   const amrex::Real *dx = geom.CellSize();
   const amrex::Real invdeltsq = 1.0 / dx[0] / dx[0];  // LSR -- what happens with mesh refinement here?
-  amrex::Real rho_avg = 0., volume = pow(dx[0] * AMREX_SPACEDIM, 3);
+  amrex::Real rho_avg = 0.;
   amrex::Real Gconst;
   amrex::ParmParse pp_grav("gravity");
   pp_grav.query("Gconst", Gconst);
@@ -195,10 +198,10 @@ void AxNewt::initData() {
       amrex::Real a = Comoving::get_comoving_a(),
                   ap = Comoving::get_comoving_ap();
 #else
-      amrex::Real a = 1.,	// TODO: need a better method here but will be fine for now. Aligned with elsewhere in the code though
+      amrex::Real a = 1.,	// If the universe is not expanding, take the scale factor and its derivative to be 1 and 0
                   ap = 0.;
 #endif
-      amrex::Real H = ap / a;  // LSR -- LatticeEasy doesn't call this H since H is a'/a, not ap/a but semantic issue
+      amrex::Real H = ap / a;  // LSR -- LatticeEasy doesn't call this H since H is adot/a, not ap/a but semantic issue
 
       tmp_grad += (1/8.)*(
                       (arr(i+1, j, k, 0) - arr(i-1, j, k, 0))*(arr(i+1, j, k, 0) - arr(i-1, j, k, 0)) +
@@ -222,7 +225,7 @@ void AxNewt::initData() {
       amrex::Real rho = (tmp_kin + pow(a, -2.*AxKG::s-2.)*tmp_grad + tmp_pot);
 //      rho = tmp_grad;
       rho *= coef;
-      rho_avg += rho / volume;
+      rho_avg += rho / (float)geom.Domain().d_numPts();  // TODO: check if we prefer Product_{i}^{i=2} geom.Domain().length(i)
 //      if (i==0 && j==0) printf("\n\n%e\n\n", arr(i,j,k));
       fab_new(i,j,k, AxNewt::getField(AxNewt::Fields::Density)) = rho; // LSR -- this works! Now just figure out above
 
@@ -231,17 +234,39 @@ void AxNewt::initData() {
 
     // Note for future me: the above segfaults *sometimes*. Why?
   }
-  amrex::MultiFab rhs(ba, dm, 1, 1);
-  MultiFab::Copy(rhs, density_new, 0, 0, 1, 1);
+  amrex::MultiFab rhs(KG_new.boxArray(), KG_new.DistributionMap(), 1, 1);
+//  MultiFab::Copy(rhs, density_new, 0, 0, 1, 1);
+  rhs.ParallelCopy(density_new);
   rhs.plus(-rho_avg, 0, 1, 0);
   rhs.mult(4.0 * M_PI * Gconst, 0);
 
-  MultiFab::Copy(PhiGrav_new, rhs, 0, 0, 1, 1);
+//  MultiFab::Copy(PhiGrav_new, density_new, 0, 0, 1, 1);
+//  PhiGrav_new.ParallelCopy(rhs); // Next step will be to add something in between here where it takes rhs in and does MLMG stuff to it
+
+  LPInfo info;
+  info.setAgglomeration(false);
+  info.setConsolidation(false);
+
+  MLPoisson mlpoisson({geom}, {KG_new.boxArray()}, {KG_new.DistributionMap()}, info);
+
+  mlpoisson.setDomainBC({AMREX_D_DECL(LinOpBCType::Periodic,
+                                      LinOpBCType::Periodic,
+                                      LinOpBCType::Periodic)},
+                        {AMREX_D_DECL(LinOpBCType::Periodic,
+                                      LinOpBCType::Periodic,
+                                      LinOpBCType::Periodic)});
+
+  MLMG mlmg(mlpoisson);
+  mlmg.setMaxIter(100);
+  mlmg.setMaxFmgIter(0);
+  mlmg.setVerbose(2);
+
+  mlmg.solve({&PhiGrav_new}, {&rhs}, 1e-10, 0.0);
 
 }
 
 amrex::Real AxNewt::advance(amrex::Real time, amrex::Real dt_old,
-                                int iteration, int ncycle) {
+                                int iteration, int ncycle) { // LSR -- what is this doing here?
   BL_PROFILE("AxNewt::advance()");
 
   amrex::Real dt = est_time_step(dt_old);

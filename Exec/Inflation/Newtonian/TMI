@@ -13,7 +13,7 @@ gravity.gravity_type = PoissonGrav      #
 gravity.no_sync      = 1                # Query no_sync flag
 gravity.no_composite = 1                # Query no_composite flag
 gravity.show_timings = 1 
-gravity.Gconst = 1			# Gravitational constant
+gravity.Gconst = 1			# Gravitational constant in program units
 gravity.calc_steps = 1			# How often to calculate Phi
 
 # New KG Axioax inputs  --PH
