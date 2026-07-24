@@ -98,7 +98,8 @@ class AxKG
             uniform = 0,
             fixed_k,
             delta_k,
-            standard
+            standard,
+            gaussian
         };
         
         static int nFields();

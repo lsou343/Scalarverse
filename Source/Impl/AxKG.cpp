@@ -119,7 +119,7 @@ void AxKG::initData()
 
     // We have to do things slightly differently if we're initializing in position-space
     // or Fourier space.
-    if(ic == ICType::uniform || ic == ICType::fixed_k)
+    if(ic == ICType::uniform || ic == ICType::fixed_k || ic == ICType::gaussian)
     {
         for (amrex::MFIter mfi(KG_new,amrex::TilingIfNotGPU()); mfi.isValid(); ++mfi)
         {
@@ -307,6 +307,8 @@ int AxKG::getIC(ICType it)
             return 2;
         case ICType::standard:
             return 3;
+        case ICType::gaussian:
+            return 4;
     }
     return -1;
 }
@@ -322,6 +324,8 @@ AxKG::ICType AxKG::getIC(int it)
             return ICType::delta_k;
         case 3:
             return ICType::standard;
+        case 4:
+            return ICType::gaussian;
     }
 
     return ICType::uniform; // TODO: This should be an error value.
@@ -348,8 +352,10 @@ void AxKG::prob_param_fill(amrex::GpuArray<amrex::Real, BaseAx::max_prob_param> 
             prob_params[2] = A;
             prob_params[3] = B;
             prob_params[4] = cutoff_k;
-
             break;
+        case ICType::gaussian:
+            prob_params[1] = KG0;	// LSR -- Temp stuff here add this as a proper case eventually!
+            prob_params[2] = .025;
     }
 }
 

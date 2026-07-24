@@ -222,13 +222,6 @@ void Gravity::solve_for_new_phi(int level, MultiFab &phi,
   MultiFab::Copy(Rhs, density_mf, density, 0, 1, 0);
   // MultiFab::Add(Rhs, density_mf, density, 0, 1, 0);
 
-#ifdef AMREX_PARTICLES
-  AddParticlesToRhs(level, Rhs,
-                    ngrow_for_solve); // Add particle densities to Rhs
-  AddVirtualParticlesToRhs(
-      level, Rhs, ngrow_for_solve);   // Add virtual particle densities to Rhs
-  AddGhostParticlesToRhs(level, Rhs); // Add ghost particle densities to Rhs
-#endif
   const Real time = LevelData[level]
                         ->get_state_data(PhiGrav_Type)
                         .curTime(); // Get current time
@@ -593,21 +586,7 @@ void Gravity::actual_multilevel_solve(
 
   Vector<MultiFab *> phi_p(num_levels);
   Vector<std::unique_ptr<MultiFab>> Rhs_p(num_levels);
-#ifdef AMREX_PARTICLES
-  Vector<std::unique_ptr<MultiFab>> Rhs_particles(num_levels);
 
-  for (int lev = 0; lev < num_levels; lev++) {
-    Rhs_particles[lev].reset(
-        new MultiFab(grids[level + lev], dmap[level + lev], 1, 0));
-    Rhs_particles[lev]->setVal(0.);
-  }
-
-  const auto &rpp = amrex::GetVecOfPtrs(Rhs_particles);
-  AddParticlesToRhs(level, finest_level, ngrow_for_solve, rpp);
-  AddGhostParticlesToRhs(level, rpp);
-  AddVirtualParticlesToRhs(finest_level, rpp);
-  amrex::Gpu::Device::streamSynchronize();
-#endif
   BaseNewt *cs = dynamic_cast<BaseNewt *>(&parent->getLevel(level));
 
   BL_ASSERT(cs != 0);
@@ -982,150 +961,7 @@ void Gravity::set_dirichlet_bcs(int level, MultiFab *phi) {
   //     to provide homogeneous Dirichlet bcs
   phi->setVal(0.0, 0, 1, phi->nGrow());
 }
-#ifdef AMREX_PARTICLES
-// Add particle densities to RHS for single level solve
-void Gravity::AddParticlesToRhs(int level, MultiFab &Rhs, int ngrow) {
-  BL_PROFILE("Gravity::AddParticlesToRhs()");
 
-  // Use the same multifab for all particle types
-  MultiFab particle_mf(grids[level], dmap[level], 1, ngrow);
-
-  for (int i = 0; i < BaseNewt::theActiveParticles().size(); i++) {
-    BaseNewt::theActiveParticles()[i]->AssignDensitySingleLevel(particle_mf,
-                                                                level);
-    amrex::Gpu::Device::streamSynchronize();
-    MultiFab::Add(Rhs, particle_mf, 0, 0, 1, 0);
-  }
-
-  amrex::Gpu::Device::streamSynchronize();
-}
-
-// Add particle densities to RHS for multilevel solve
-void Gravity::AddParticlesToRhs(int base_level, int finest_level, int ngrow,
-                                const Vector<MultiFab *> &Rhs_particles) {
-  BL_PROFILE("Gravity::AddParticlesToRhsML()");
-
-  const int num_levels = finest_level - base_level + 1;
-  for (int i = 0; i < BaseNewt::theActiveParticles().size(); i++) {
-    Vector<std::unique_ptr<MultiFab>> PartMF;
-    BaseNewt::theActiveParticles()[i]->AssignDensity(PartMF, base_level, 1,
-                                                     finest_level, ngrow);
-#ifdef AMREX_DEBUG
-    for (int lev = 0; lev < num_levels; lev++) {
-      if (PartMF[lev]->contains_nan()) {
-        std::cout << "Testing particle density of type " << i << " at level "
-                  << base_level + lev << std::endl;
-        amrex::Abort(
-            "...PartMF has NaNs in Gravity::actual_multilevel_solve()");
-      }
-    }
-#endif
-
-    for (int lev = finest_level - 1 - base_level; lev >= 0; lev--) {
-      amrex::average_down(*PartMF[lev + 1], *PartMF[lev], 0, 1,
-                          parent->refRatio(lev + base_level));
-    }
-
-    for (int lev = 0; lev < num_levels; lev++) {
-      if ((*PartMF[lev]).DistributionMap() ==
-              (*Rhs_particles[lev]).DistributionMap() &&
-          (*PartMF[lev]).boxArray().CellEqual((*Rhs_particles[lev]).boxArray()))
-        MultiFab::Add(*Rhs_particles[lev], *PartMF[lev], 0, 0, 1, 0);
-      else
-        Rhs_particles[lev]->ParallelAdd(*PartMF[lev]);
-    }
-  }
-  amrex::Gpu::Device::streamSynchronize();
-}
-
-// Add virtual particle densities to RHS for single level solve
-void Gravity::AddVirtualParticlesToRhs(int level, MultiFab &Rhs, int ngrow) {
-  BL_PROFILE("Gravity::AddVirtualParticlesToRhs()");
-
-  if (level < parent->finestLevel()) {
-    // If we have virtual particles, add their density to the single level solve
-    MultiFab particle_mf(grids[level], dmap[level], 1, ngrow);
-
-    for (int i = 0; i < BaseNewt::theVirtualParticles().size(); i++) {
-      particle_mf.setVal(0.);
-      BaseNewt::theVirtualParticles()[i]->AssignDensitySingleLevel(particle_mf,
-                                                                   level, 1, 1);
-      MultiFab::Add(Rhs, particle_mf, 0, 0, 1, 0);
-    }
-  }
-
-  amrex::Gpu::Device::streamSynchronize();
-}
-
-// Add virtual particle densities to RHS for multilevel solve
-void Gravity::AddVirtualParticlesToRhs(
-    int finest_level, const Vector<MultiFab *> &Rhs_particles) {
-  BL_PROFILE("Gravity::AddVirtualParticlesToRhsML()");
-  if (finest_level < parent->finestLevel()) {
-    // Should only need ghost cells for virtual particles if they're near
-    // the simulation boundary and even then only maybe
-    MultiFab VirtPartMF(grids[finest_level], dmap[finest_level], 1, 1);
-    VirtPartMF.setVal(0.0);
-
-    for (int i = 0; i < BaseNewt::theGhostParticles().size(); i++) {
-      BaseNewt::theVirtualParticles()[i]->AssignDensitySingleLevel(
-          VirtPartMF, finest_level, 1, 1);
-      MultiFab::Add(*Rhs_particles[finest_level], VirtPartMF, 0, 0, 1, 0);
-    }
-  }
-  amrex::Gpu::Device::streamSynchronize();
-}
-
-// Add ghost particle densities to RHS for single level solve
-void Gravity::AddGhostParticlesToRhs(int level, MultiFab &Rhs) {
-  BL_PROFILE("Gravity::AddGhostParticlesToRhs()");
-
-  if (level > 0) {
-    int ncomp = 1;
-    IntVect ngrow = parent->refRatio(level - 1);
-
-    // If we have ghost particles, add their density to the single level solve
-    MultiFab ghost_mf(grids[level], dmap[level], ncomp, ngrow);
-
-    for (int i = 0; i < BaseNewt::theGhostParticles().size(); i++) {
-      ghost_mf.setVal(0.);
-      BaseNewt::theGhostParticles()[i]->AssignDensitySingleLevel(
-          ghost_mf, level, ncomp, -1);
-      MultiFab::Add(Rhs, ghost_mf, 0, 0, ncomp, 0);
-    }
-  }
-
-  amrex::Gpu::Device::streamSynchronize();
-}
-
-// Add ghost particle densities to RHS for multilevel solve
-void Gravity::AddGhostParticlesToRhs(int level,
-                                     const Vector<MultiFab *> &Rhs_particles) {
-  BL_PROFILE("Gravity::AddGhostParticlesToRhsML()");
-
-  if (level > 0) {
-    int ncomp = 1;
-    IntVect ngrow = parent->refRatio(level - 1);
-
-    // We require one ghost cell in GhostPartMF because that's how we handle
-    // particles near fine-fine boundaries. However, we don't add any ghost
-    // cells from GhostPartMF to the RHS.
-    MultiFab GhostPartMF(grids[level], dmap[level], ncomp, ngrow);
-    GhostPartMF.setVal(0.0);
-
-    // Get the Ghost particle mass function. Note that Ghost particles should
-    // only affect the coarsest level so we use a single level solve. We pass in
-    // -1 for the particle_lvl_offset because that makes the particles the size
-    // of the coarse, not fine, dx.
-    for (int i = 0; i < BaseNewt::theGhostParticles().size(); i++) {
-      BaseNewt::theGhostParticles()[i]->AssignDensitySingleLevel(
-          GhostPartMF, level, ncomp, -1);
-      MultiFab::Add(*Rhs_particles[0], GhostPartMF, 0, 0, 1, 0);
-    }
-  }
-  amrex::Gpu::Device::streamSynchronize();
-}
-#endif
 
 // Correct RHS using mass offset for periodic boundary conditions
 void Gravity::CorrectRhsUsingOffset(int level, MultiFab &Rhs) {

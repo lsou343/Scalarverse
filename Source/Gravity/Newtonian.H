@@ -6,9 +6,6 @@
 
 #include <AMReX_AmrLevel.H>     // Include AMReX AmrLevel class header
 #include <AMReX_FluxRegister.H> // Include AMReX FluxRegister class header
-#ifdef AMREX_PARTICLES
-#include <AMReX_Particles.H> // Include AMReX Particles class header if AMREX_PARTICLES is defined
-#endif
 #include <AMReX_MLCellLinOp.H>
 #include <AMReX_MLLinOp.H>   // Include AMReX MLLinOp class header
 #include <AMReX_MLPoisson.H> // Include AMReX MLPoisson class header
@@ -234,28 +231,6 @@ protected:
   static amrex::Real ml_tol;
   static amrex::Real delta_tol;
   /*static*/ int calc_steps = 1;	// LSR -- TODO: working title, but some variable that says how often to calculate Phi. Implement this properly
-
-  // Adds particles to the right-hand side
-  void AddParticlesToRhs(int level, amrex::MultiFab &Rhs, int ngrow);
-
-  // Adds ghost particles to the right-hand side
-  void AddGhostParticlesToRhs(int level, amrex::MultiFab &Rhs);
-
-  // Adds virtual particles to the right-hand side
-  void AddVirtualParticlesToRhs(int level, amrex::MultiFab &Rhs, int ngrow);
-
-  // Adds particles to the right-hand side across multiple levels
-  void AddParticlesToRhs(int base_level, int finest_level, int ngrow,
-                         const amrex::Vector<amrex::MultiFab *> &Rhs_particles);
-
-  // Adds ghost particles to the right-hand side across multiple levels
-  void
-  AddGhostParticlesToRhs(int level,
-                         const amrex::Vector<amrex::MultiFab *> &Rhs_particles);
-
-  // Adds virtual particles to the right-hand side across multiple levels
-  void AddVirtualParticlesToRhs(
-      int finest_level, const amrex::Vector<amrex::MultiFab *> &Rhs_particles);
 
   // Corrects the right-hand side using the mass offset
   void CorrectRhsUsingOffset(int level, amrex::MultiFab &Rhs);

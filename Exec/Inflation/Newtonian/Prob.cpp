@@ -71,6 +71,32 @@ void AxKG::prob_initdata_pos(
                                 // satisfy smooth periodic boundary conditions.
     fields(i, j, k, AxKG::getField(AxKG::Fields::KGfv)) = 0.;
     break;
+  case AxKG::ICType::gaussian:
+    // TODO: Add this in!
+    for (int n = 1; n <= 2; n++)
+      if (prob_param[n] == PAR_ERR_VAL)
+        amrex::Error("prob_initdata_pos: in gaussian IC---insufficient number "
+                     "of problem parameters!");
+
+    // The following needs to be scoped in its own block for the static
+    // variables to work
+    {
+      // Problem variables
+      static amrex::Real ampl = prob_param[1];
+      static amrex::Real sigma = prob_param[2];
+
+      // Geometry
+      amrex::Real L = geomdata.ProbHi(0) -
+                      geomdata.ProbLo(0);    // We assume a cubical geometry.
+      amrex::Real dx = geomdata.CellSize(0); // We assume a cubical geometry.
+      int N = geomdata.Domain().length(0);   // Assuming a cubical domain
+      amrex::Real L2 = L / 2;
+      int N2 = N / 2;
+
+      fields(i, j, k, AxKG::getField(AxKG::Fields::KGf)) = ampl * std::exp(-0.5 * dx * dx * (std::pow(i - N2, 2) + std::pow(j - N2, 2) + std::pow(k - N2, 2)) / std::pow(sigma, 2));
+      fields(i, j, k, AxKG::getField(AxKG::Fields::KGfv)) = 0.;
+    }
+    break;
   default:
     amrex::Error("prob_initdata_state: Selected initial condition type is not "
                  "yet implemented!");
