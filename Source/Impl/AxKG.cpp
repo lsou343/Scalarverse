@@ -355,7 +355,7 @@ void AxKG::prob_param_fill(amrex::GpuArray<amrex::Real, BaseAx::max_prob_param> 
             break;
         case ICType::gaussian:
             prob_params[1] = KG0;	// LSR -- Temp stuff here add this as a proper case eventually!
-            prob_params[2] = .025;
+            prob_params[2] = .5;
     }
 }
 

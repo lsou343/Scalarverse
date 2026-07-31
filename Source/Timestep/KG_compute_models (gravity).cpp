@@ -1,6 +1,11 @@
 #include <KG_compute_models.H>
 #include <AxKG.H>
 
+#ifdef NEWT  // LSR -- Include gravitational stuff if needed
+#include <Newtonian.H>
+#include <AxNewt.H>
+#endif
+
 namespace Models
 {
 
@@ -13,12 +18,12 @@ amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, amrex::
 
     if (a == 0.)
     {
-        ret = grad2F;
+        ret = grad2F;  // LSR -- TODO: figure this out. Where does it come from? 1/a^2 when a is zero should make this diverge?
 
     }
     else
     {
-        ret = 
+        ret = // LSR -- TODO: add conditional Phi in here (currently psi but that is confusing)
             //// a^{-2s - 2}\nabla^2 f_pr
             pow(a,-2.*AxKG::s-2.)*(1+4*psi(i,j,k,comp))*grad2F // LSR -- Comp is the field (0) - only currently looks at field values but can also do field derivatives
 

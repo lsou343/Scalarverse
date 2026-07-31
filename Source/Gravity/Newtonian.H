@@ -133,6 +133,20 @@ public:
                                     int use_previous_phi_as_guess = 0);
 
   // LSR -- TODO: add density solvers here as well
+  void solve_density_data(const amrex::Box &bx, 
+                          amrex::Array4<amrex::Real> const &arr,
+                          amrex::Array4<amrex::Real> &Density,
+                          amrex::Real invdeltsq,
+                          amrex::Real a, amrex::Real ap);
+
+  void solve_Phi_data(amrex::Geometry const geom,
+                      amrex::MultiFab &rhs,
+                      amrex::MultiFab &Phi,
+                      amrex::Real a);
+
+  void solve_rhs(amrex::Geometry const geom,
+                        amrex::MultiFab &rhs,
+                        amrex::Real Ggravity);
 
   // Performs the actual multilevel solve
   void actual_multilevel_solve(

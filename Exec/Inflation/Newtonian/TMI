@@ -22,7 +22,7 @@ gravity.calc_steps = 1			# How often to calculate Phi
 # ####################### #
 
 KG.simType                = 3           # T-model inflation
-KG.ICType                 = 4           # 0 = uniform, 1 = fixed_k, 2 = delta_k (i.e., fixed_k in momentum space), 3 = standard, 4 = gaussian
+KG.ICType                 = 3           # 0 = uniform, 1 = fixed_k, 2 = delta_k (i.e., fixed_k in momentum space), 3 = standard, 4 = gaussian
 KG.KG_k                   = 2           # LSR -- maybe try 2
 KG.cutoff_k               = 0           # and 0
 KG.mass                   = 1.28e-06    # As per the LatticeEasy T-model.

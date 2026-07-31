@@ -5,6 +5,7 @@
 #include <AMReX_MLMG.H> // Include AMReX multigrid solver
 #include <AMReX_MLPoisson.H>
 #include <AMReX_ParmParse.H> // Include AMReX parameter parsing
+#include <AxNewt.H>
 
 using namespace amrex; // Use the AMReX namespace
 
@@ -1185,4 +1186,74 @@ void Gravity::set_boundary(BndryData &bd, MultiFab &rhs, const Real *dx) {
       }
     }
   }
+}
+
+  // LSR -- TODO: add density solvers here as well
+void Gravity::solve_density_data(const amrex::Box &bx, 
+                        amrex::Array4<amrex::Real> const &arr,
+                        amrex::Array4<amrex::Real> &Density,
+                        amrex::Real invdeltsq,
+                        amrex::Real a, amrex::Real ap) {
+  amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
+    amrex::Real H = ap / a;
+    amrex::Real tmp_grad = 0., tmp_pot = 0., tmp_kin = 0.;
+
+    amrex::Real *tmp = Models::compute_rho(arr, i, j, k, AxKG::getField(AxKG::Fields::KGf), invdeltsq, a);
+
+    tmp_grad += tmp[0];
+    tmp_pot += tmp[1];
+
+    tmp_kin += 0.5*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv));
+    tmp_kin -= AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H;
+    tmp_kin += 0.5*AxKG::r*AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H*H;
+
+    const amrex::Real coef = (AxKG::B*AxKG::B/AxKG::A/AxKG::A);
+    amrex::Real rho = (tmp_kin + pow(a, -2.*AxKG::s-2.)*tmp_grad + tmp_pot);
+
+    rho *= coef;
+
+    Density(i,j,k, AxNewt::getField(AxNewt::Fields::Density)) = rho; // LSR -- this works! Now just figure out above
+  });
+}
+
+void Gravity::solve_Phi_data(amrex::Geometry const geom,
+                             amrex::MultiFab &rhs,
+                             amrex::MultiFab &Phi,
+                             amrex::Real a) {
+  printf("\n\nsolve_Phi\n\n");
+  LPInfo info;
+  info.setAgglomeration(false);
+  info.setConsolidation(false);
+
+  //MLPoisson mlpoisson({geom}, {density_new.boxArray()}, {density_new.DistributionMap()}, info);
+  std::unique_ptr<amrex::MLPoisson> mlpoisson;
+  mlpoisson.reset(new MLPoisson({geom}, {rhs.boxArray()}, {rhs.DistributionMap()}, info));
+
+  mlpoisson->setDomainBC({AMREX_D_DECL(LinOpBCType::Periodic,
+                                      LinOpBCType::Periodic,
+                                      LinOpBCType::Periodic)},
+                        {AMREX_D_DECL(LinOpBCType::Periodic,
+                                      LinOpBCType::Periodic,
+                                      LinOpBCType::Periodic)});
+
+  MLMG mlmg(*mlpoisson);
+  mlmg.setMaxIter(100);
+  mlmg.setMaxFmgIter(0);
+  mlmg.setVerbose(2);
+
+  mlmg.solve({&Phi}, {&rhs}, 1e-10, 0.0);  // LSR -- TODO: set 1e-10 to reltol
+  Phi.mult(1/a, 0);
+//  Phi.ParallelCopy(rhs, 0, 0, 1, 1, 1);
+}
+
+void Gravity::solve_rhs(amrex::Geometry const geom,
+                        amrex::MultiFab &rhs,
+                        amrex::Real Ggravity) {
+  amrex::Real rho_avg;// = 0.;
+  rho_avg = rhs.sum(0);
+  rho_avg /= (float)geom.Domain().d_numPts();
+
+  rhs.plus(-rho_avg, 0, 1, 0);
+  rhs.mult(Ggravity, 0);
+  rhs.FillBoundary(geom.periodicity());
 }

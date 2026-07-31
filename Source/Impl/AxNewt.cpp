@@ -164,114 +164,55 @@ void AxNewt::initData() {
   // 4. Set Phidot = 0. We can do this for two reasons. First, we typically choose program variables such that phi' = 0 for stability, and hence Phi' must also be zero. Second, it is assumed that Phi << phi and Phi' << H, so initially Phi' must be small since Phi and H will be as well. - DONE, but maybe we can just calculate Phidot anyway? WIP
   // 5. Do we need to calculate time stepping here or elsewhere?
 
+  if (!gravity) {
+    amrex::Abort("Gravity object not initialized.");
+  }
+
   amrex::BoxArray ba;
   amrex::DistributionMapping dm;
 
-  amrex::MultiFab&  KG_new = get_new_data(AxKG::getState(AxKG::StateType::KG_Type));  // LSR -- get_level(level).get_new_data -> get_new_data
+  // Initialise the field multifabs
+  amrex::MultiFab& KG_new = get_new_data(AxKG::getState(AxKG::StateType::KG_Type));  // LSR -- get_level(level).get_new_data -> get_new_data
   amrex::MultiFab& density_new = get_density();  // LSR -- get_density returns zero at all points on the grid so need to update this
   amrex::MultiFab& PhiGrav_new = get_new_data(getState(StateType::PhiGrav_Type));
   PhiGrav_new.setVal(0.);
+
+  // We also need the right hand side of the Poisson equation
   amrex::MultiFab rhs(KG_new.boxArray(), KG_new.DistributionMap(), 1, 1);  // LSR -- Right hand side of the Poisson equation
 
-  // ALSO: may not work generally because it relies too heavily on KGComov - need a solution that is independent of KGComov
-  
-  // initData_rho(density_new, KG_new, geom);
+  // Define some useful constants
   const amrex::Real *dx = geom.CellSize();
   const amrex::Real invdeltsq = 1.0 / dx[0] / dx[0];  // LSR -- what happens with mesh refinement here?
   amrex::Real rho_avg = 0.;
-  amrex::Real Gconst;
-  amrex::ParmParse pp_grav("gravity");
-  pp_grav.query("Gconst", Gconst);
 
   // TODO: Tidy this section up
   amrex::MultiFab KG(KG_new.boxArray(), KG_new.DistributionMap(), 2, 1);  // LSR -- this is very annoying but the only fix I could find for the periodic boundary condition problem below
   KG.ParallelCopy(KG_new);
-  KG_new.FillBoundary(geom.periodicity());
+  KG.FillBoundary(geom.periodicity());
   
   amrex::Real phi_avg = 0.;
 
-  for (amrex::MFIter mfi(density_new, false); mfi.isValid(); ++mfi) { // LSR -- does this even make sense for initial conditions? - Yes
-    amrex::Array4<amrex::Real> const &arr = KG_new.array(mfi);
-    const amrex::Box &bx = mfi.tilebox();
-    const auto fab_new = density_new.array(mfi);
-//    const auto Phi_fab_new = Phi_new.array(mfi); // LSR -- is this necessary?
-
-    amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
-      amrex::Real tmp_grad = 0., tmp_pot = 0., tmp_kin = 0.;
 #ifdef INFLATION    
-      amrex::Real a = Comoving::get_comoving_a(),
-                  ap = Comoving::get_comoving_ap();
+  amrex::Real a = Comoving::get_comoving_a(),
+              ap = Comoving::get_comoving_ap();
 #else
-      amrex::Real a = 1.,	// If the universe is not expanding, take the scale factor and its derivative to be 1 and 0
-                  ap = 0.;
+  amrex::Real a = 1.,	// If the universe is not expanding, take the scale factor and its derivative to be 1 and 0
+              ap = 0.;
 #endif
-      amrex::Real H = ap / a;  // LSR -- LatticeEasy doesn't call this H since H is adot/a, not ap/a but semantic issue
 
-      tmp_grad += (1/8.)*(
-                      (arr(i+1, j, k, 0) - arr(i-1, j, k, 0))*(arr(i+1, j, k, 0) - arr(i-1, j, k, 0)) +
-                      (arr(i, j+1, k, 0) - arr(i, j-1, k, 0))*(arr(i, j+1, k, 0) - arr(i, j-1, k, 0)) +
-                      (arr(i, j, k+1, 0) - arr(i, j, k-1, 0))*(arr(i, j, k+1, 0) - arr(i, j, k-1, 0))
-                    )*invdeltsq; // 6 point stencil in 3D - breaking on one boundary (k-direction, or along the z-axis). Suspect it's to do with the multifab box, maybe not looping around properly? Fields are definitely fine by themselves so something odd is happening with the way this is defined. arr(i, j, -1) = 0 (and presumably true for arr(i, j, 128) as well).
-                    // Maybe we can't use mesh refinement with this? Not easily at least - should be doable with ghost cells but may need some interpolation.
-                    // New guess: something to do with splitting across processors? This definitely breaks the code so will eventually need to figure that out
+  for (amrex::MFIter mfi(density_new, false); mfi.isValid(); ++mfi) { // LSR -- does this even make sense for initial conditions? - Yes
+    amrex::Array4<amrex::Real> const arr = KG.array(mfi);
+    const amrex::Box &bx = mfi.tilebox();
+    amrex::Array4<amrex::Real> fab_new = density_new.array(mfi);
 
-//      amrex::Real *tmp = Models::compute_rho(arr, i, j, k, AxKG::getField(AxKG::Fields::KGf), invdeltsq, a);
-
-//      tmp_grad += tmp[0];
-
-      tmp_pot = Models::compute_model_quantity({arr(i,j,k,0)}, 0, a, 0., 0. /* app doesn't matter and neither does ap? So why are they included? */ , Models::Quant::V); // NEW TODO: Figure this out
-
-      tmp_kin += 0.5*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv));
-      tmp_kin -= AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H;
-      tmp_kin += 0.5*AxKG::r*AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H*H;
-
-      const amrex::Real coef = (AxKG::B*AxKG::B/AxKG::A/AxKG::A);
-      amrex::Real rho = (tmp_kin + pow(a, -2.*AxKG::s-2.)*tmp_grad + tmp_pot);
-
-      rho *= coef;
-      rho_avg += rho / (float)geom.Domain().d_numPts();  // TODO: check if we prefer Product_{i}^{i=2} geom.Domain().length(i)
-
-      fab_new(i,j,k, AxNewt::getField(AxNewt::Fields::Density)) = rho; // LSR -- this works! Now just figure out above
-
-      phi_avg += arr(i,j,k,AxKG::getField(AxKG::Fields::KGf)) / (float)geom.Domain().d_numPts();
-    });
-    // Note: I'm going to keep everything in here for now but eventually I may create init_density() and init_phi() functions in Newtonian.H or Newtonian.cpp
-
+    gravity->solve_density_data(bx, arr, fab_new, invdeltsq, a, ap);
     // Note for future me: the above segfaults *sometimes*. Why?
   }
-
-  rhs.ParallelCopy(KG_new, 0, 0, 1, 1, 1);  // LSR -- Copy density into rhs
+  rhs.ParallelCopy(density_new, 0, 0, 1, 1, 1);  // LSR -- Copy density into rhs
   rhs.FillBoundary(geom.periodicity());
 
-  printf("\ n \nrho_avg: %e\n\n", phi_avg);
-  //rhs.plus(-rho_avg, 0, 1, 0);
-  rhs.plus(-phi_avg, 0, 1, 0);
-  //rhs.mult(4.0 * M_PI * Gconst, 0);
-
-//  MultiFab::Copy(PhiGrav_new, density_new, 0, 0, 1, 1);
-//  PhiGrav_new.ParallelCopy(rhs); // Next step will be to add something in between here where it takes rhs in and does MLMG stuff to it
-
-  LPInfo info;
-  info.setAgglomeration(false);
-  info.setConsolidation(false);
-
-  //MLPoisson mlpoisson({geom}, {density_new.boxArray()}, {density_new.DistributionMap()}, info);
-  std::unique_ptr<amrex::MLPoisson> mlpoisson;
-  mlpoisson.reset(new MLPoisson({geom}, {density_new.boxArray()}, {density_new.DistributionMap()}, info));
-
-  mlpoisson->setDomainBC({AMREX_D_DECL(LinOpBCType::Periodic,
-                                      LinOpBCType::Periodic,
-                                      LinOpBCType::Periodic)},
-                        {AMREX_D_DECL(LinOpBCType::Periodic,
-                                      LinOpBCType::Periodic,
-                                      LinOpBCType::Periodic)});
-
-  MLMG mlmg(*mlpoisson);
-  mlmg.setMaxIter(100);
-  mlmg.setMaxFmgIter(0);
-  mlmg.setVerbose(2);
-
-  mlmg.solve({&PhiGrav_new}, {&rhs}, 1e-10, 0.0);
+  gravity->solve_rhs(geom, rhs, Ggravity);
+  gravity->solve_Phi_data(geom, rhs, PhiGrav_new, a);
 
 }
 

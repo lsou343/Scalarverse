@@ -1,6 +1,11 @@
 #include <AxKG.H>
 #include <KG_compute_models.H>
 
+#ifdef NEWT  // LSR -- Include gravitational stuff if needed
+#include <Newtonian.H>
+#include <AxNewt.H>
+#endif
+
 amrex::Real AxKG::advance (amrex::Real time,
               amrex::Real dt,
               int  iteration,
@@ -64,6 +69,13 @@ amrex::Real AxKG::advance (amrex::Real time,
     /* } */
     ///////////
 
+#ifdef NEWT
+    amrex::MultiFab&  density = get_old_data(AxNewt::getState(AxNewt::StateType::Density_Type));
+    amrex::MultiFab&  Phi = get_old_data(AxNewt::getState(AxNewt::StateType::PhiGrav_Type));
+    gravity->solve_density_data();
+//    gravity->solve_rhs();
+//    gravity->solve_Phi_data();
+#endif
     BL_PROFILE_VAR_STOP(KG_ADVANCE);
 
     return dt;
