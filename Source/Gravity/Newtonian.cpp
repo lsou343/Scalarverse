@@ -1190,28 +1190,34 @@ void Gravity::set_boundary(BndryData &bd, MultiFab &rhs, const Real *dx) {
 
   // LSR -- TODO: add density solvers here as well
 void Gravity::solve_density_data(const amrex::Box &bx, 
-                        amrex::Array4<amrex::Real> const &arr,
-                        amrex::Array4<amrex::Real> &Density,
+                        amrex::Array4<amrex::Real> const& arr,
+                        amrex::Array4<amrex::Real> Density,
                         amrex::Real invdeltsq,
                         amrex::Real a, amrex::Real ap) {
   amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
     amrex::Real H = ap / a;
     amrex::Real tmp_grad = 0., tmp_pot = 0., tmp_kin = 0.;
 
-    amrex::Real *tmp = Models::compute_rho(arr, i, j, k, AxKG::getField(AxKG::Fields::KGf), invdeltsq, a);
+    tmp_grad += (1/8.)*(
+                        (arr(i+1, j, k, 0) - arr(i-1, j, k, 0))*(arr(i+1, j, k, 0) - arr(i-1, j, k, 0)) +
+                        (arr(i, j+1, k, 0) - arr(i, j-1, k, 0))*(arr(i, j+1, k, 0) - arr(i, j-1, k, 0)) +
+                        (arr(i, j, k+1, 0) - arr(i, j, k-1, 0))*(arr(i, j, k+1, 0) - arr(i, j, k-1, 0))
+                       )*invdeltsq;
 
-    tmp_grad += tmp[0];
-    tmp_pot += tmp[1];
+//    amrex::Real *tmp = Models::compute_rho(arr, i, j, k, AxKG::getField(AxKG::Fields::KGf), invdeltsq, a);  // Breaking here at next timestep
+
+//    tmp_grad += tmp[0];
+    tmp_pot += Models::compute_model_quantity({arr(i,j,k,0)}, 0, a, ap, 0., Models::Quant::V);  // Note that ap is not actually currently used in compute_model_quantity, although it may be in future
 
     tmp_kin += 0.5*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv));
     tmp_kin -= AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H;
     tmp_kin += 0.5*AxKG::r*AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H*H;
 
-    const amrex::Real coef = (AxKG::B*AxKG::B/AxKG::A/AxKG::A);
+    const amrex::Real coef = (AxKG::B*AxKG::B/AxKG::A/AxKG::A);  // Converts to physical units! We don't want this - also not quite because doesn't take scale factor into account
     amrex::Real rho = (tmp_kin + pow(a, -2.*AxKG::s-2.)*tmp_grad + tmp_pot);
 
-    rho *= coef;
-
+    // rho *= coef;
+    if (i == 64 && j == 64 && k == 64) printf("\n\nphi(64,64,64): %e\n\n", arr(i, j, k, 0));
     Density(i,j,k, AxNewt::getField(AxNewt::Fields::Density)) = rho; // LSR -- this works! Now just figure out above
   });
 }
@@ -1220,7 +1226,6 @@ void Gravity::solve_Phi_data(amrex::Geometry const geom,
                              amrex::MultiFab &rhs,
                              amrex::MultiFab &Phi,
                              amrex::Real a) {
-  printf("\n\nsolve_Phi\n\n");
   LPInfo info;
   info.setAgglomeration(false);
   info.setConsolidation(false);
@@ -1242,7 +1247,7 @@ void Gravity::solve_Phi_data(amrex::Geometry const geom,
   mlmg.setVerbose(2);
 
   mlmg.solve({&Phi}, {&rhs}, 1e-10, 0.0);  // LSR -- TODO: set 1e-10 to reltol
-  Phi.mult(1/a, 0);
+  Phi.mult(1/a, 0);	// LSR -- TODO: figure this out. Is it 1/a or *a? Or neither?
 //  Phi.ParallelCopy(rhs, 0, 0, 1, 1, 1);
 }
 

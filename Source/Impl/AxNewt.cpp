@@ -119,11 +119,13 @@ void AxNewt::init(AmrLevel &old) {
   printf("\n\ninit(old)\n\n");
 
   amrex::MultiFab&  density_new = get_new_data(getState(StateType::Density_Type));
+  amrex::MultiFab&  Phi_new = get_new_data(getState(StateType::PhiGrav_Type));
 
   AxNewt* old_level = static_cast<AxNewt*> (&old);
   amrex::Real cur_time  = old_level->state[State_for_Time].curTime();
 
-  FillPatch(old, density_new, 0, cur_time, getState(StateType::Density_Type), 0, nFields());
+  FillPatch(old, density_new, 0, cur_time, getState(StateType::Density_Type), 0, 1);
+  FillPatch(old, Phi_new, 0, cur_time, getState(StateType::PhiGrav_Type), 0, nFields());  // This will need to be updated to have PhiGravv_Type as well maybe
 
   amrex::Gpu::Device::streamSynchronize();
 
@@ -150,8 +152,12 @@ void AxNewt::initData() {
   BL_PROFILE("AxNewt::initData()");
 #ifdef INFLATION
   AxKGComov::initData();
+  amrex::Real a = Comoving::get_comoving_a(),
+              ap = Comoving::get_comoving_ap();
 #else
   AxKG::initData()
+  amrex::Real a = 1.,	// If the universe is not expanding, take the scale factor and its derivative to be 1 and 0
+              ap = 0.;
 #endif
   printf("\n\ninitData\n\n");
   // LSR -- So now the field and field derivative are ready, next step is add density... how? Schroedinger defines it initially and then finds its value in timestep, is this the way forward?
@@ -162,7 +168,7 @@ void AxNewt::initData() {
   // 2.5 Read in parameters to do with gravity (in particular gconst) - DONE?
   // 3. Caclulate initial Phi value - DONE
   // 4. Set Phidot = 0. We can do this for two reasons. First, we typically choose program variables such that phi' = 0 for stability, and hence Phi' must also be zero. Second, it is assumed that Phi << phi and Phi' << H, so initially Phi' must be small since Phi and H will be as well. - DONE, but maybe we can just calculate Phidot anyway? WIP
-  // 5. Do we need to calculate time stepping here or elsewhere?
+  // 5. Do we need to calculate time stepping here or elsewhere? Elsewhere
 
   if (!gravity) {
     amrex::Abort("Gravity object not initialized.");
@@ -187,18 +193,11 @@ void AxNewt::initData() {
 
   // TODO: Tidy this section up
   amrex::MultiFab KG(KG_new.boxArray(), KG_new.DistributionMap(), 2, 1);  // LSR -- this is very annoying but the only fix I could find for the periodic boundary condition problem below
+                                                                          // TODO: fix this so that the code is less messy
   KG.ParallelCopy(KG_new);
   KG.FillBoundary(geom.periodicity());
   
   amrex::Real phi_avg = 0.;
-
-#ifdef INFLATION    
-  amrex::Real a = Comoving::get_comoving_a(),
-              ap = Comoving::get_comoving_ap();
-#else
-  amrex::Real a = 1.,	// If the universe is not expanding, take the scale factor and its derivative to be 1 and 0
-              ap = 0.;
-#endif
 
   for (amrex::MFIter mfi(density_new, false); mfi.isValid(); ++mfi) { // LSR -- does this even make sense for initial conditions? - Yes
     amrex::Array4<amrex::Real> const arr = KG.array(mfi);
@@ -216,18 +215,18 @@ void AxNewt::initData() {
 
 }
 
-amrex::Real AxNewt::advance(amrex::Real time, amrex::Real dt_old,
-                                int iteration, int ncycle) { // LSR -- what is this doing here?
-  BL_PROFILE("AxNewt::advance()");
+//amrex::Real AxNewt::advance(amrex::Real time, amrex::Real dt_old,
+//                                int iteration, int ncycle) { // LSR -- what is this doing here?
+//  BL_PROFILE("AxNewt::advance()");
 
-  amrex::Real dt = est_time_step(dt_old);
+//  amrex::Real dt = est_time_step(dt_old);
 
   // Print diagnostic information
-  amrex::Print() << "AxNewt::advance at time " << time << " with dt " << dt
-                 << std::endl;
+//  amrex::Print() << "AxNewt::advance at time " << time << " with dt " << dt
+//                 << std::endl;
 
-  return dt;
-}
+//  return dt;
+//}
 
 amrex::Real AxNewt::est_time_step(amrex::Real dt_old) {
   BL_PROFILE("AxNewt::est_time_step()");
@@ -297,14 +296,25 @@ void AxNewt::variable_setup() {
   // Establish fields
   
   desc_lst.setComponent(getState(StateType::Density_Type),
-                        getField(Fields::Density), "density", bc, bndryfunc);
+                        getField(Fields::Density), "Edens_pr", bc, bndryfunc);
   desc_lst.setComponent(getState(StateType::PhiGrav_Type),
-                        getField(Fields::PhiGrav), "PhiGrav", bc, bndryfunc);
+                        getField(Fields::PhiGrav), "PhiGrav_pr", bc, bndryfunc);  // LSR -- TODO: change this to pr. Maybe PhiGrav_pr and PhiGravV_pr?
   desc_lst.setComponent(getState(StateType::PhiGrav_Type),
-                        getField(Fields::PhiGravv), "PhiGravv", bc, bndryfunc);
+                        getField(Fields::PhiGravv), "PhiGravV_pr", bc, bndryfunc);
 
   // TODO: add derived fields with non-program units
+#ifdef TEST
+  derive_lst.add("Edens_rel", amrex::IndexType::TheCellType(), 1, Derived::PhiGrav, Derived::grow_box_by_one);
+  derive_lst.addComponent("Edens_rel", desc_lst, getState(StateType::Density_Type), getField(Fields::Density), 1);  // LSR -- what are these two lines doing?
 
+  derive_lst.add("PhiGrav", amrex::IndexType::TheCellType(), 1, Derived::PhiGrav, Derived::grow_box_by_one);
+  derive_lst.addComponent("PhiGrav", desc_lst, getState(StateType::PhiGrav_Type), getField(Fields::PhiGrav), 1);  // LSR -- what are these two lines doing?
+  derive_lst.addComponent("PhiGrav", desc_lst, getState(StateType::PhiGrav_Type), getField(Fields::PhiGravv), 1);
+
+  derive_lst.add("PhiGravv", amrex::IndexType::TheCellType(), 1, Derived::PhiGrav, Derived::grow_box_by_one);
+  derive_lst.addComponent("PhiGravv", desc_lst, getState(StateType::PhiGrav_Type), getField(Fields::PhiGrav), 1);  // LSR -- what are these two lines doing?
+  derive_lst.addComponent("PhiGravv", desc_lst, getState(StateType::PhiGrav_Type), getField(Fields::PhiGravv), 1);
+#endif
 }
 
 // Helper functions to map fields and states. This will be very useful when

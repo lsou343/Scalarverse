@@ -101,24 +101,22 @@ amr.EdensRel.start_time     = 2.5
 
 # ## Checkpoint files
 amr.check_file            = Outputs/chk              # The prefix of checkpoint folder names
-amr.check_int             = 10000              # The interval of steps at which to save checkpoints
+amr.check_int             = 200              # The interval of steps at which to save checkpoints
 
 # ## Plotfiles
 amr.plot_file             = Outputs/plt              # The prefix of plot folder names
-amr.plot_int              = 10000               # The interval of steps at which to save plots 
+amr.plot_int              = 200               # The interval of steps at which to save plots 
 
 # ## Log file 
 amr.data_log = Outputs/runlog                        
 amr.grid_log = Outputs/grdlog           
 
 # ## Output field names
-amr.plot_vars = KGfpr KGfVpr density PhiGrav PhiGravv			# Primitive fields output in plot folders/checkpoints
-                                                        # KGfpr and KGfVpr are the field and time-derivative in program units
-amr.derive_plot_vars = KGf KGfv KGfdens Edens           # Derived fields output in plot folders/checkpoints 
-                                                        # Options are: KGf, KGfv (field and time-dv in Natural units), 
-                                                        # KGfdens (field^2 in Natural units), and Edens (energy density in Natural units)
-#amr.plot_vars = density phi_grav           		# Primitive fields output in plot folders/checkpoints
-                                                        # KGfpr and KGfVpr are the field and time-derivative in program units
+amr.plot_vars = KGfpr KGfVpr Edens_pr PhiGrav_pr PhiGravV_pr		# Primitive fields output in plot folders/checkpoints
+                                                        		# KGfpr and KGfVpr are the field and time-derivative in program units
+amr.derive_plot_vars = KGf KGfv KGfdens Edens           		# Derived fields output in plot folders/checkpoints 
+                                                        		# Options are: KGf, KGfv (field and time-dv in Natural units), 
+                                                        		# KGfdens (field^2 in Natural units), and Edens (energy density in Natural units)
 
 # ## Other
 amr.probin_file = ""                         # TODO

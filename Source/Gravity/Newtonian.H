@@ -135,7 +135,7 @@ public:
   // LSR -- TODO: add density solvers here as well
   void solve_density_data(const amrex::Box &bx, 
                           amrex::Array4<amrex::Real> const &arr,
-                          amrex::Array4<amrex::Real> &Density,
+                          amrex::Array4<amrex::Real> Density,
                           amrex::Real invdeltsq,
                           amrex::Real a, amrex::Real ap);
 

@@ -1,5 +1,6 @@
 #include <KG_compute_models.H>
 #include <AxKG.H>
+// #include <model.H> // LSR -- TODO: add this somewhere and define everything for the model there
 
 #ifdef NEWT  // LSR -- Include gravitational stuff if needed
 #include <Newtonian.H>

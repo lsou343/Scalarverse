@@ -8,6 +8,9 @@ ifeq ($(USE_INFLATION), TRUE)
   ifeq ($(USE_COMOV_FULL), TRUE)
       CEXE_sources += KG_Comov_advance.cpp 
   endif
+  ifeq ($(USE_NEWT), TRUE)
+      CEXE_sources += Newt_advance.cpp
+  endif
 endif
 
 ifeq ($(USE_SCHROEDINGER), TRUE)
