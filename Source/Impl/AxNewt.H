@@ -104,6 +104,9 @@ protected:
 //                    const amrex::GeometryData &geomdata,
 //                    const amrex::GpuArray<double, 10> &prob_param) override;
 
+  // In Timestep
+  void kick_KG (amrex::Real time, amrex::Real dt_half, amrex::MultiFab&  mf_old, amrex::MultiFab&  mf_new, amrex::MultiFab& Phi_old, const amrex::Real invdeltasq);
+  void drift_KG (amrex::Real dt, amrex::MultiFab&  mf_old, amrex::MultiFab&  mf_new);
 
   void outputPotentialSpectrum(const std::string &dir);  // LSR - uncommented this -- recommented cos don't think we need it
 };

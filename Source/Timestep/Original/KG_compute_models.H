@@ -17,12 +17,7 @@ enum class Quant
 };
 
 // Returns the RHS of equations of motion, used in AmrLevel::advance(). This function computes the gradient.
-amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, 
-                                  int i, int j, int k, int comp, amrex::Real invdeltasq, amrex::Real a, amrex::Real ap, amrex::Real app);
-
-// Variation of above to include the gravitational potential
-amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, amrex::Array4<amrex::Real> const& phi, 
-                                  int i, int j, int k, int comp, amrex::Real invdeltasq, amrex::Real a, amrex::Real ap, amrex::Real app);
+amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, int i, int j, int k, int comp, amrex::Real invdeltasq, amrex::Real a, amrex::Real ap, amrex::Real app);
 
 // Returns: quantity==V   --> V
 //          quantity==Vp  --> dV/df_i

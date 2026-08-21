@@ -3,6 +3,9 @@
 
 // #include <AMReX_MultiFab.H>
 #include <AxKG.H>
+#ifdef NEWT  // LSR -- Include gravitational stuff if needed
+#include <AxNewt.H>
+#endif
 #include <AMReX_REAL.H>
 #include <AMReX_Array4.H>
 
@@ -18,10 +21,9 @@ enum class Quant
 
 // Returns the RHS of equations of motion, used in AmrLevel::advance(). This function computes the gradient.
 amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, 
-                                  int i, int j, int k, int comp, amrex::Real invdeltasq, amrex::Real a, amrex::Real ap, amrex::Real app);
-
-// Variation of above to include the gravitational potential
-amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, amrex::Array4<amrex::Real> const& phi, 
+#ifdef NEWT
+                                  amrex::Array4<amrex::Real> const& psi,
+#endif
                                   int i, int j, int k, int comp, amrex::Real invdeltasq, amrex::Real a, amrex::Real ap, amrex::Real app);
 
 // Returns: quantity==V   --> V

@@ -125,7 +125,7 @@ void AxNewt::init(AmrLevel &old) {
   amrex::Real cur_time  = old_level->state[State_for_Time].curTime();
 
   FillPatch(old, density_new, 0, cur_time, getState(StateType::Density_Type), 0, 1);
-  FillPatch(old, Phi_new, 0, cur_time, getState(StateType::PhiGrav_Type), 0, nFields());  // This will need to be updated to have PhiGravv_Type as well maybe
+  FillPatch(old, Phi_new, 0, cur_time, getState(StateType::PhiGrav_Type), 0, nFields());
 
   amrex::Gpu::Device::streamSynchronize();
 
@@ -141,7 +141,10 @@ void AxNewt::init() {
 
   amrex::MultiFab&  Dens_new = get_new_data(getState(StateType::Density_Type));
   FillCoarsePatch(Dens_new, 0, cur_time, getState(StateType::Density_Type), 0, Dens_new.nComp());
-    
+
+  amrex::MultiFab&  Phi_new = get_new_data(getState(StateType::PhiGrav_Type));
+  FillCoarsePatch(Phi_new, 0, cur_time, getState(StateType::PhiGrav_Type), 0, Phi_new.nComp());
+
   // We set dt to be large for this new level to avoid screwing up
   // computeNewDt.
   parent->setDtLevel(1.e100, level);
@@ -160,15 +163,6 @@ void AxNewt::initData() {
               ap = 0.;
 #endif
   printf("\n\ninitData\n\n");
-  // LSR -- So now the field and field derivative are ready, next step is add density... how? Schroedinger defines it initially and then finds its value in timestep, is this the way forward?
-
-  // Regardless of pos or mom, we have pos field values now
-  // 1. Find how to call them - DONE
-  // 2. Set density using phidot^2 + grad^2 phi + V(phi) - DONE
-  // 2.5 Read in parameters to do with gravity (in particular gconst) - DONE?
-  // 3. Caclulate initial Phi value - DONE
-  // 4. Set Phidot = 0. We can do this for two reasons. First, we typically choose program variables such that phi' = 0 for stability, and hence Phi' must also be zero. Second, it is assumed that Phi << phi and Phi' << H, so initially Phi' must be small since Phi and H will be as well. - DONE, but maybe we can just calculate Phidot anyway? WIP
-  // 5. Do we need to calculate time stepping here or elsewhere? Elsewhere
 
   if (!gravity) {
     amrex::Abort("Gravity object not initialized.");
@@ -179,40 +173,48 @@ void AxNewt::initData() {
 
   // Initialise the field multifabs
   amrex::MultiFab& KG_new = get_new_data(AxKG::getState(AxKG::StateType::KG_Type));  // LSR -- get_level(level).get_new_data -> get_new_data
-  amrex::MultiFab& density_new = get_density();  // LSR -- get_density returns zero at all points on the grid so need to update this
-  amrex::MultiFab& PhiGrav_new = get_new_data(getState(StateType::PhiGrav_Type));
+  amrex::MultiFab& density_new = get_density();
+  amrex::MultiFab& PhiGrav_new = get_new_data(AxNewt::getState(AxNewt::StateType::PhiGrav_Type));
   PhiGrav_new.setVal(0.);
-
-  // We also need the right hand side of the Poisson equation
-  amrex::MultiFab rhs(KG_new.boxArray(), KG_new.DistributionMap(), 1, 1);  // LSR -- Right hand side of the Poisson equation
 
   // Define some useful constants
   const amrex::Real *dx = geom.CellSize();
   const amrex::Real invdeltsq = 1.0 / dx[0] / dx[0];  // LSR -- what happens with mesh refinement here?
-  amrex::Real rho_avg = 0.;
 
-  // TODO: Tidy this section up
   amrex::MultiFab KG(KG_new.boxArray(), KG_new.DistributionMap(), 2, 1);  // LSR -- this is very annoying but the only fix I could find for the periodic boundary condition problem below
                                                                           // TODO: fix this so that the code is less messy
   KG.ParallelCopy(KG_new);
   KG.FillBoundary(geom.periodicity());
+
+  gravity->solve_density_data(level, KG, density_new, invdeltsq, a, ap);
+  density_new.FillBoundary(geom.periodicity());
+
+  // Want PhiGrav_new to have the same shape as density_new
+//  for (amrex::MFIter mfi(PhiGrav_new, false); mfi.isValid(); ++mfi) {
+//    const amrex::Box &bx = mfi.tilebox();
+//    amrex::Array4<amrex::Real> PhiGrav = PhiGrav_new.array(mfi);
+//    amrex::Array4<amrex::Real> Density = density_new.array(mfi);
+//    amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
+//      PhiGrav(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGrav)) = Density(i,j,k,0);  // This feels so bad
+//      PhiGrav(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGravv)) = 0.;  // This feels so bad
+//    });
+//  }
+  gravity->solve_Phi_data(level, geom, density_new, PhiGrav_new, a);  // Need to initialise Phi data using MFIter
+  PhiGrav_new.FillBoundary(geom.periodicity());
+
+// Some diagnostic stuff // TODO: delete
   
-  amrex::Real phi_avg = 0.;
-
-  for (amrex::MFIter mfi(density_new, false); mfi.isValid(); ++mfi) { // LSR -- does this even make sense for initial conditions? - Yes
-    amrex::Array4<amrex::Real> const arr = KG.array(mfi);
-    const amrex::Box &bx = mfi.tilebox();
-    amrex::Array4<amrex::Real> fab_new = density_new.array(mfi);
-
-    gravity->solve_density_data(bx, arr, fab_new, invdeltsq, a, ap);
-    // Note for future me: the above segfaults *sometimes*. Why?
-  }
-  rhs.ParallelCopy(density_new, 0, 0, 1, 1, 1);  // LSR -- Copy density into rhs
-  rhs.FillBoundary(geom.periodicity());
-
-  gravity->solve_rhs(geom, rhs, Ggravity);
-  gravity->solve_Phi_data(geom, rhs, PhiGrav_new, a);
-
+//  for (amrex::MFIter mfi(PhiGrav_new, false); mfi.isValid(); ++mfi) {
+//    const amrex::Box &bx = mfi.tilebox();
+//    amrex::Array4<amrex::Real> PhiGrav = PhiGrav_new.array(mfi);
+//    amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
+//      if (i == 0 && j == 0 && k == 0)
+//      {
+//        printf("\n\nPhiGrav:  %e\n\n",PhiGrav(0,0,0,0));
+//        printf("\n\nPhiGravV: %e\n\n",PhiGrav(0,0,0,1));
+//      }
+//    });
+//  }
 }
 
 //amrex::Real AxNewt::advance(amrex::Real time, amrex::Real dt_old,
@@ -274,19 +276,19 @@ void AxNewt::variable_setup() {
   bndryfunc.setRunOnGPU(true);
 
   Interpolater *interp;
-  interp = &amrex::cell_cons_interp;
+  interp = &amrex::cell_bilinear_interp;
 
   // Establish the additional workhorse fields
   std::cout << "Adding descriptors to desc_lst..." << std::endl;
 
   desc_lst.addDescriptor(getState(StateType::Density_Type),
                          amrex::IndexType::TheCellType(),
-                         amrex::StateDescriptor::Point, 1, 1 /* nfields() */, interp,
+                         amrex::StateDescriptor::Point, 1, 1 /* nFields() */, interp,
                          state_data_extrap, store_in_checkpoint);
 
   desc_lst.addDescriptor(getState(StateType::PhiGrav_Type),
                          amrex::IndexType::TheCellType(),
-                         amrex::StateDescriptor::Point, 0 /* nextra - what is this? 0 for KGf and KGfv */, nFields(), interp,
+                         amrex::StateDescriptor::Point, 1 /* nextra - number of ghost cells. 0 for KGf and KGfv */, nFields(), interp,
                          state_data_extrap, store_in_checkpoint);
 
   // Set components
@@ -303,15 +305,16 @@ void AxNewt::variable_setup() {
                         getField(Fields::PhiGravv), "PhiGravV_pr", bc, bndryfunc);
 
   // TODO: add derived fields with non-program units
-#ifdef TEST
-  derive_lst.add("Edens_rel", amrex::IndexType::TheCellType(), 1, Derived::PhiGrav, Derived::grow_box_by_one);
-  derive_lst.addComponent("Edens_rel", desc_lst, getState(StateType::Density_Type), getField(Fields::Density), 1);  // LSR -- what are these two lines doing?
 
-  derive_lst.add("PhiGrav", amrex::IndexType::TheCellType(), 1, Derived::PhiGrav, Derived::grow_box_by_one);
+  derive_lst.add("PhiGrav", amrex::IndexType::TheCellType(), 1, Derived::derPhiGrav, Derived::grow_box_by_one);
   derive_lst.addComponent("PhiGrav", desc_lst, getState(StateType::PhiGrav_Type), getField(Fields::PhiGrav), 1);  // LSR -- what are these two lines doing?
   derive_lst.addComponent("PhiGrav", desc_lst, getState(StateType::PhiGrav_Type), getField(Fields::PhiGravv), 1);
 
-  derive_lst.add("PhiGravv", amrex::IndexType::TheCellType(), 1, Derived::PhiGrav, Derived::grow_box_by_one);
+#ifdef TEST
+  derive_lst.add("Edens_rel", amrex::IndexType::TheCellType(), 1, Derived::derEdens_rel, Derived::grow_box_by_one);
+  derive_lst.addComponent("Edens_rel", desc_lst, getState(StateType::Density_Type), getField(Fields::Density), 1);  // LSR -- what are these two lines doing?
+
+  derive_lst.add("PhiGravv", amrex::IndexType::TheCellType(), 1, Derived::derPhiGravv, Derived::grow_box_by_one);
   derive_lst.addComponent("PhiGravv", desc_lst, getState(StateType::PhiGrav_Type), getField(Fields::PhiGrav), 1);  // LSR -- what are these two lines doing?
   derive_lst.addComponent("PhiGravv", desc_lst, getState(StateType::PhiGrav_Type), getField(Fields::PhiGravv), 1);
 #endif
@@ -351,7 +354,12 @@ int AxNewt::getField(Fields f) {
   return field;
 }
 
-int AxNewt::nStates() { return 2; }
+int AxNewt::nStates() {
+  // If AxKG had 1 state (KG_Type) = 0
+  // we add 2 more here: Density_Type = 1, PhiGrav_Type = 2
+  // => total = 3
+  return 3;
+}
 
 int AxNewt::getState(StateType st) {
   int state = -1;

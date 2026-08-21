@@ -165,6 +165,7 @@ void AxKGComov::fill_rho(amrex::MultiFab &mf, amrex::Real invdeltsq) {
                  arr(i, j, k, getField(Fields::KGf)) *
                  arr(i, j, k, getField(Fields::KGf)) * H * H;
     });
+//    printf("\n\ngrad: %e,\nkin: %e,\npot: %e,\n\n", tmp_grad, tmp_kin, tmp_pot);  // LSR -- Debug
   }
   Comoving::add_to_rho(tmp_grad, tmp_pot, tmp_kin);
 }

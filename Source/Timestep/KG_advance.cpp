@@ -1,11 +1,6 @@
 #include <AxKG.H>
 #include <KG_compute_models.H>
 
-#ifdef NEWT  // LSR -- Include gravitational stuff if needed
-#include <Newtonian.H>
-#include <AxNewt.H>
-#endif
-
 amrex::Real AxKG::advance (amrex::Real time,
               amrex::Real dt,
               int  iteration,

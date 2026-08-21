@@ -203,7 +203,7 @@ void Gravity::solve_for_old_phi(int level, MultiFab &phi,
 
 // Solve for new phi (gravitational potential) at a level
 void Gravity::solve_for_new_phi(int level, MultiFab &phi,
-                                const Vector<MultiFab *> &grad_phi, /* Why does it need to be const? Shouldn't have been assigned yet since it's Rhs! */
+                                const Vector<MultiFab *> &grad_phi,
                                 int fill_interior, int ngrow_for_solve) {
   BL_PROFILE("Gravity::solve_for_new_phi()");
 
@@ -1189,50 +1189,62 @@ void Gravity::set_boundary(BndryData &bd, MultiFab &rhs, const Real *dx) {
 }
 
   // LSR -- TODO: add density solvers here as well
-void Gravity::solve_density_data(const amrex::Box &bx, 
-                        amrex::Array4<amrex::Real> const& arr,
-                        amrex::Array4<amrex::Real> Density,
-                        amrex::Real invdeltsq,
-                        amrex::Real a, amrex::Real ap) {
-  amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
-    amrex::Real H = ap / a;
-    amrex::Real tmp_grad = 0., tmp_pot = 0., tmp_kin = 0.;
+void Gravity::solve_density_data(int level,
+                                 amrex::MultiFab &KG,
+                                 amrex::MultiFab &density_fab,
+                                 amrex::Real invdeltsq,
+                                 amrex::Real a, amrex::Real ap) {
+  for (amrex::MFIter mfi(density_fab, false); mfi.isValid(); ++mfi) {
+    const amrex::Box &bx = mfi.tilebox();
+    amrex::Array4<amrex::Real> const arr = KG.array(mfi);
+    amrex::Array4<amrex::Real> Density = density_fab.array(mfi);
+    amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
+      amrex::Real H = ap / a;
+      amrex::Real tmp_grad = 0., tmp_pot = 0., tmp_kin = 0.;
 
-    tmp_grad += (1/8.)*(
-                        (arr(i+1, j, k, 0) - arr(i-1, j, k, 0))*(arr(i+1, j, k, 0) - arr(i-1, j, k, 0)) +
-                        (arr(i, j+1, k, 0) - arr(i, j-1, k, 0))*(arr(i, j+1, k, 0) - arr(i, j-1, k, 0)) +
-                        (arr(i, j, k+1, 0) - arr(i, j, k-1, 0))*(arr(i, j, k+1, 0) - arr(i, j, k-1, 0))
-                       )*invdeltsq;
+      tmp_grad += (1/8.)*(
+                          (arr(i+1, j, k, 0) - arr(i-1, j, k, 0))*(arr(i+1, j, k, 0) - arr(i-1, j, k, 0)) +
+                          (arr(i, j+1, k, 0) - arr(i, j-1, k, 0))*(arr(i, j+1, k, 0) - arr(i, j-1, k, 0)) +
+                          (arr(i, j, k+1, 0) - arr(i, j, k-1, 0))*(arr(i, j, k+1, 0) - arr(i, j, k-1, 0))
+                         )*invdeltsq;
 
-//    amrex::Real *tmp = Models::compute_rho(arr, i, j, k, AxKG::getField(AxKG::Fields::KGf), invdeltsq, a);  // Breaking here at next timestep
+//      amrex::Real *tmp = Models::compute_rho(arr, i, j, k, AxKG::getField(AxKG::Fields::KGf), invdeltsq, a);  // Breaking here at next timestep
 
-//    tmp_grad += tmp[0];
-    tmp_pot += Models::compute_model_quantity({arr(i,j,k,0)}, 0, a, ap, 0., Models::Quant::V);  // Note that ap is not actually currently used in compute_model_quantity, although it may be in future
+//      tmp_grad += tmp[0];
+      tmp_pot += Models::compute_model_quantity({arr(i,j,k,0)}, 0, a, ap, 0., Models::Quant::V);  // Note that ap is not actually currently used in compute_model_quantity, although it may be in future
 
-    tmp_kin += 0.5*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv));
-    tmp_kin -= AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H;
-    tmp_kin += 0.5*AxKG::r*AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H*H;
+      tmp_kin += 0.5*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv));
+      tmp_kin -= AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGfv))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H;
+      tmp_kin += 0.5*AxKG::r*AxKG::r*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*arr(i,j,k,AxKG::getField(AxKG::Fields::KGf))*H*H;
 
-    const amrex::Real coef = (AxKG::B*AxKG::B/AxKG::A/AxKG::A);  // Converts to physical units! We don't want this - also not quite because doesn't take scale factor into account
-    amrex::Real rho = (tmp_kin + pow(a, -2.*AxKG::s-2.)*tmp_grad + tmp_pot);
+      const amrex::Real coef = (AxKG::B*AxKG::B/AxKG::A/AxKG::A);  // Converts to physical units! We don't want this - also not quite because doesn't take scale factor into account
+      amrex::Real rho = (tmp_kin + pow(a, -2.*AxKG::s-2.)*tmp_grad + tmp_pot);
 
-    // rho *= coef;
-    if (i == 64 && j == 64 && k == 64) printf("\n\nphi(64,64,64): %e\n\n", arr(i, j, k, 0));
-    Density(i,j,k, AxNewt::getField(AxNewt::Fields::Density)) = rho; // LSR -- this works! Now just figure out above
-  });
+      // rho *= coef;
+      // if (i == 64 && j == 64 && k == 64) printf("\n\nphi(64,64,64): %e\n\n", arr(i, j, k, 0));
+      Density(i,j,k, AxNewt::getField(AxNewt::Fields::Density)) = rho; // LSR -- this works! Now just figure out above
+    });
+  }
 }
 
-void Gravity::solve_Phi_data(amrex::Geometry const geom,
-                             amrex::MultiFab &rhs,
+void Gravity::solve_Phi_data(int level,
+                             amrex::Geometry const geom,
+                             amrex::MultiFab &Density,
                              amrex::MultiFab &Phi,
                              amrex::Real a) {
+  amrex::MultiFab rhs(grids[level], dmap[level], 1, 0);  // LSR -- Right hand side of the Poisson equation
+  // MultiFab::Copy(rhs, Density, 0, 0, 1, 0);
+  // rhs.ParallelCopy(density[level], 0, 0, 1, 1, 1);
+  solve_rhs(level, geom, rhs, Density, Ggravity);
   LPInfo info;
   info.setAgglomeration(false);
   info.setConsolidation(false);
 
   //MLPoisson mlpoisson({geom}, {density_new.boxArray()}, {density_new.DistributionMap()}, info);
   std::unique_ptr<amrex::MLPoisson> mlpoisson;
-  mlpoisson.reset(new MLPoisson({geom}, {rhs.boxArray()}, {rhs.DistributionMap()}, info));
+  //mlpoisson.reset(new MLPoisson({geom}, {rhs.boxArray()}, {rhs.DistributionMap()}, info));
+  mlpoisson.reset(new MLPoisson({geom}, {grids[level]}, {dmap[level]}, info));
+  //mlpoisson.reset(new MLPoisson({geom}, {Density.boxArray()}, {Density.DistributionMap()}, info));
 
   mlpoisson->setDomainBC({AMREX_D_DECL(LinOpBCType::Periodic,
                                       LinOpBCType::Periodic,
@@ -1245,20 +1257,29 @@ void Gravity::solve_Phi_data(amrex::Geometry const geom,
   mlmg.setMaxIter(100);
   mlmg.setMaxFmgIter(0);
   mlmg.setVerbose(2);
-
-  mlmg.solve({&Phi}, {&rhs}, 1e-10, 0.0);  // LSR -- TODO: set 1e-10 to reltol
-  Phi.mult(1/a, 0);	// LSR -- TODO: figure this out. Is it 1/a or *a? Or neither?
-//  Phi.ParallelCopy(rhs, 0, 0, 1, 1, 1);
+  mlmg.solve({&Phi}, {&rhs}, 1e-10, 0.0);  // LSR -- TODO: set 1e-10 to reltol - sltol?
+  Phi.mult(1/a, 0);	// LSR -- TODO: figure this out. Is it 1/a or *a? Or neither? Think 1/a
 }
 
-void Gravity::solve_rhs(amrex::Geometry const geom,
+void Gravity::solve_rhs(int level,
+                        amrex::Geometry const geom,
                         amrex::MultiFab &rhs,
+                        amrex::MultiFab &Density,
                         amrex::Real Ggravity) {
-  amrex::Real rho_avg;// = 0.;
-  rho_avg = rhs.sum(0);
-  rho_avg /= (float)geom.Domain().d_numPts();
-
+  amrex::Real rho_avg = 0.;
+  for (amrex::MFIter mfi(rhs, false); mfi.isValid(); ++mfi) {
+    const amrex::Box &bx = mfi.tilebox();
+    amrex::Array4<amrex::Real> const rhs_arr = rhs.array(mfi);
+    amrex::Array4<amrex::Real> const density_arr = Density.array(mfi);
+    amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
+      rhs_arr(i,j,k) = density_arr(i,j,k,AxNewt::getField(AxNewt::Fields::Density));
+      rho_avg += rhs_arr(i,j,k);
+    });
+  }
+  rho_avg = rhs.sum() / (float)geom.Domain().d_numPts();
   rhs.plus(-rho_avg, 0, 1, 0);
+  //CorrectRhsUsingOffset(level, rhs);
   rhs.mult(Ggravity, 0);
   rhs.FillBoundary(geom.periodicity());
+  printf("\nrho_avg: %e\n\n", rho_avg);
 }

@@ -1,5 +1,7 @@
 #include <NewtDerive.H>
 #include <AxNewt.H>
+#include <AxKG.H>
+#include <Comoving_Full.H>
 
 #ifdef __cplusplus
 extern "C"
@@ -48,8 +50,30 @@ void Derived::derPhiGrav(const amrex::Box& bx, amrex::FArrayBox& derfab, int dco
     auto const dat = datfab.array();
     auto const der = derfab.array();
 
+    amrex::Real coef = AxKG::A * AxKG::A;
+#ifdef INFLATION
+    coef *= Comoving::get_comoving_a() * Comoving::get_comoving_a();
+#endif
+
     amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-        der(i, j, k, dcomp) = dat(i, j, k, AxNewt::getField(AxNewt::Fields::PhiGrav));
+        der(i, j, k, dcomp) = dat(i, j, k, AxNewt::getField(AxNewt::Fields::PhiGrav)) / coef;
+    });
+}
+
+void Derived::derPhiGravv(const amrex::Box& bx, amrex::FArrayBox& derfab, int dcomp, int ncomp,
+                         const amrex::FArrayBox& datfab, const amrex::Geometry& geomdata,
+                         amrex::Real time, const int* bcrec, int level)  // TODO: Set correct coefficient to account for time derivative
+{
+    auto const dat = datfab.array();
+    auto const der = derfab.array();
+
+    amrex::Real coef = AxKG::A * AxKG::A;
+#ifdef INFLATION
+    coef *= Comoving::get_comoving_a() * Comoving::get_comoving_a();
+#endif
+
+    amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
+        der(i, j, k, dcomp) = dat(i, j, k, AxNewt::getField(AxNewt::Fields::PhiGrav)) / coef;
     });
 }
 

@@ -83,7 +83,7 @@ void AxKG::init ()
 
     amrex::MultiFab&  Ax_new = get_new_data(getState(StateType::KG_Type));
     FillCoarsePatch(Ax_new, 0, cur_time, getState(StateType::KG_Type), 0, Ax_new.nComp());
-    
+
     // We set dt to be large for this new level to avoid screwing up
     // computeNewDt.
     parent->setDtLevel(1.e100, level);

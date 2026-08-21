@@ -1,9 +1,14 @@
 #include <KG_compute_models.H>
 #include <AxKG.H>
+// #include <model.H> // LSR -- TODO: add this somewhere and define everything for the model there
+
+#ifdef NEWT  // LSR -- Include gravitational stuff if needed
+#include <Newtonian.H>
+#include <AxNewt.H>
+#endif
 
 namespace Models
 {
-
 amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, int i, int j, int k, int comp, amrex::Real invdeltasq, amrex::Real a, amrex::Real ap, amrex::Real app)
 {
 
@@ -30,6 +35,42 @@ amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, int i, 
 
     return ret;
 }
+#ifdef NEWT // Don't love this! TODO: figure out a better fix (or leave it idk)
+// Acceleration with Newtonian gravity
+amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, amrex::Array4<amrex::Real> const& phi,
+                                  int i, int j, int k, int comp, amrex::Real invdeltasq, amrex::Real a, amrex::Real ap, amrex::Real app) // Added phi array
+{
+
+    amrex::Real grad2F = compute_grad2F(arr, i, j, k, comp, 1)*invdeltasq;
+
+    amrex::Real ret = 0.;
+
+    if (a == 0.)
+    {
+        ret = grad2F * (1 + 4*pow(a, 2.*(AxKG::s - AxKG::r)) / (AxKG::A*AxKG::A) * phi(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGrav)));
+    }
+    else
+    {
+        ret =
+            //// a^{-2s - 2}\nabla^2 f_pr
+            pow(a,-2.*AxKG::s-2.) * (1 + 4*pow(a, 2.*(AxKG::s - AxKG::r)) / (AxKG::A*AxKG::A) *phi(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGrav)))*grad2F
+            // LSR -- Comp is the field (0) - only currently looks at field values but can also do field derivatives
+
+            //// + (r(s-r+2)*(a'/a)^2 + r*a''/a)f_pr
+            + (AxKG::r*(AxKG::s-AxKG::r+2.)*(ap/a)*(ap/a) + AxKG::r*app/a)*arr(i,j,k,comp);
+            
+            //// - 4 phi' (f_pr' - r (a'/a) f_pr)
+//            + 4 * pow(a, 2.*(AxKG::s - AxKG::r)) / (AxKG::A*AxKG::A) * phi(i,j,k,compf) * (arr(i,j,k,compf) - r * (ap/a) * arr(i,j,k,comp));  // LSR -- ignore for now
+    }
+
+    amrex::Real pot = compute_model_quantity({arr(i,j,k,comp)}, comp, a, ap, app, Quant::Vp);
+    pot *= (1-2*pow(a, 2.*(AxKG::s - AxKG::r)) / (AxKG::A*AxKG::A)*phi(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGrav)));
+
+    ret -= pot;
+
+    return ret;
+}
+#endif
 
 amrex::Real compute_model_quantity(amrex::Vector<amrex::Real> f, int comp, amrex::Real a, amrex::Real ap, amrex::Real app, Quant quantity)
 {
