@@ -16,7 +16,6 @@ amrex::Real AxKGComov::advance (amrex::Real time,
   //                counter starts at 1
   //    ncycle    : the number of subcycles at this level
 {
-
     amrex::MultiFab::RegionTag amrlevel_tag("AmrLevel_Level_" + std::to_string(level));
 
     BL_PROFILE("AxKGComov::advance_KG()");
@@ -47,6 +46,7 @@ amrex::Real AxKGComov::advance (amrex::Real time,
     //   v_{i+1/2} = v_i + a_i(dt/2)
     //   x_{i+1} = x_i + v_{i+1/2}dt
     //   v_{i+1} = v_{i+1/2} + a_{i+1}(dt/2)
+
     kick_KG(time, dt_half, KG_old, KG_new, invdeltasq);
 
     drift_KG(dt, KG_old, KG_new);

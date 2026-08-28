@@ -17,7 +17,6 @@ amrex::Real AxKG::advance (amrex::Real time,
   //    ncycle    : the number of subcycles at this level
 
 {
-
     amrex::MultiFab::RegionTag amrlevel_tag("AmrLevel_Level_" + std::to_string(level));
 
     BL_PROFILE("AxKG::advance_KG()");

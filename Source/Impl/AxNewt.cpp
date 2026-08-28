@@ -177,43 +177,28 @@ void AxNewt::initData() {
   amrex::MultiFab& PhiGrav_new = get_new_data(AxNewt::getState(AxNewt::StateType::PhiGrav_Type));
   PhiGrav_new.setVal(0.);
 
+  KG_new.FillBoundary(geom.periodicity());
+
   // Define some useful constants
   const amrex::Real *dx = geom.CellSize();
   const amrex::Real invdeltsq = 1.0 / dx[0] / dx[0];  // LSR -- what happens with mesh refinement here?
 
-  amrex::MultiFab KG(KG_new.boxArray(), KG_new.DistributionMap(), 2, 1);  // LSR -- this is very annoying but the only fix I could find for the periodic boundary condition problem below
-                                                                          // TODO: fix this so that the code is less messy
-  KG.ParallelCopy(KG_new);
-  KG.FillBoundary(geom.periodicity());
-
-  gravity->solve_density_data(level, KG, density_new, invdeltsq, a, ap);
+  gravity->solve_density_data(level, KG_new, density_new, invdeltsq, a, ap);
   density_new.FillBoundary(geom.periodicity());
 
-  // Want PhiGrav_new to have the same shape as density_new
-//  for (amrex::MFIter mfi(PhiGrav_new, false); mfi.isValid(); ++mfi) {
-//    const amrex::Box &bx = mfi.tilebox();
-//    amrex::Array4<amrex::Real> PhiGrav = PhiGrav_new.array(mfi);
-//    amrex::Array4<amrex::Real> Density = density_new.array(mfi);
-//    amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
-//      PhiGrav(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGrav)) = Density(i,j,k,0);  // This feels so bad
-//      PhiGrav(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGravv)) = 0.;  // This feels so bad
-//    });
-//  }
-  gravity->solve_Phi_data(level, geom, density_new, PhiGrav_new, a);  // Need to initialise Phi data using MFIter
-  PhiGrav_new.FillBoundary(geom.periodicity());
+  gravity->solve_Phi_data(level, geom, density_new, PhiGrav_new, a);
+//  PhiGrav_new.FillBoundary(geom.periodicity());
+//  const int i = 129,
+//            j = 64,
+//            k = 64;
+//  for (amrex::MFIter mfi(KG_new,amrex::TilingIfNotGPU()); mfi.isValid(); ++mfi){
+//       amrex::Array4<amrex::Real> const& arr_new = PhiGrav_new.array(mfi);
+//       amrex::Array4<amrex::Real> const& arr_old = density_new.array(mfi);
+//       amrex::Array4<amrex::Real> const& KG = KG_new.array(mfi);
 
-// Some diagnostic stuff // TODO: delete
-  
-//  for (amrex::MFIter mfi(PhiGrav_new, false); mfi.isValid(); ++mfi) {
-//    const amrex::Box &bx = mfi.tilebox();
-//    amrex::Array4<amrex::Real> PhiGrav = PhiGrav_new.array(mfi);
-//    amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE(int i, int j, int k) {
-//      if (i == 0 && j == 0 && k == 0)
-//      {
-//        printf("\n\nPhiGrav:  %e\n\n",PhiGrav(0,0,0,0));
-//        printf("\n\nPhiGravV: %e\n\n",PhiGrav(0,0,0,1));
-//      }
-//    });
+//       printf("\n\nKG(%i, %i, %i, 0) = %e\ndensity_new(%i, %i, %i, 0) = %e\nPhiGrav_new(%i, %i, %i, 0) = %e\n\n", i, j, k, KG(i,j,k), 
+//       													             i, j, k, arr_old(i, j, k), 
+//       													             i, j, k, arr_new(i, j, k));
 //  }
 }
 
@@ -364,6 +349,9 @@ int AxNewt::nStates() {
 int AxNewt::getState(StateType st) {
   int state = -1;
   switch (st) {
+//  case StateType::KG_Type:
+//    state = 0;
+//    break;
   case StateType::Density_Type:
     state = 1;
     break;

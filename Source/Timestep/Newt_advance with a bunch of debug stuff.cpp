@@ -44,9 +44,16 @@ amrex::Real AxNewt::advance (amrex::Real time,
 
     // Set up the MultiFabs
 
-    amrex::MultiFab&  KG_old = get_level(level).get_old_data(AxKG::getState(AxKG::StateType::KG_Type));  // Wonder if this is not working properly?
+    amrex::MultiFab&  KG_old = get_level(level).get_old_data(AxKG::getState(AxKG::StateType::KG_Type));
     amrex::MultiFab&  KG_new = get_level(level).get_new_data(AxKG::getState(AxKG::StateType::KG_Type));
-    KG_old.FillBoundary(geom.periodicity());
+//    KG_old.FillBoundary(geom.periodicity()); // LSR -- TODO: only if level = 0!!! - not working?
+
+//    for (amrex::MFIter mfi(KG_new,amrex::TilingIfNotGPU()); mfi.isValid(); ++mfi){
+//       amrex::Array4<amrex::Real> const& arr_new = KG_new.array(mfi);
+//       amrex::Array4<amrex::Real> const& arr_old = KG_old.array(mfi);
+
+//       printf("\n\narr_old(129, 129, 129, 0) = %e\narr_new(129, 129, 129, 0) = %e\n\n", arr_old(129, 129, 129, 1), arr_new(129, 129, 129, 1));
+//    }
 
     amrex::MultiFab&  density_new = get_level(level).get_new_data(AxNewt::getState(AxNewt::StateType::Density_Type));
 
@@ -60,11 +67,11 @@ amrex::Real AxNewt::advance (amrex::Real time,
     //   v_{i+1} = v_{i+1/2} + a_{i+1}(dt/2)
 
     kick_KG(time, dt_half, KG_old, KG_new, Phi_old, invdeltasq);
-    KG_new.FillBoundary(geom.periodicity());
-
+//    KG_new.FillBoundary(geom.periodicity());  // Something like this definitely needed here since we use the ghost cells on the boundary in the next kick.
+//    printf("\n\nTest1\n\n");
     drift_KG(dt, KG_old, KG_new);
 
-#ifdef COMOV_FULL
+#ifdef INFLATION
     // Only advance the scale-factor with the root grid
     if(level == 0)
     {
@@ -81,12 +88,65 @@ amrex::Real AxNewt::advance (amrex::Real time,
     amrex::Real a = 1.,
                 ap = 0.;
 #endif
-
+//    printf("\n\nTest2\n\n");
     kick_KG(time+dt, dt_half, KG_new, KG_new, Phi_old, invdeltasq);  //N.B. The time+dt is what makes it a_{i+1} on the second go. --PH
+//    KG_new.FillBoundary(geom.periodicity());
 
+//    KG.ParallelCopy(KG_new);
+//    KG.FillBoundary(geom.periodicity()); // LSR -- this probably doesn't work generally because we may have timesteps at higher levels with Dirichlet BCs. Keep for now but figure out!
+//    printf("\n\nTest3\n\n");
+
+//    for (amrex::MFIter mfi(KG_new,amrex::TilingIfNotGPU()); mfi.isValid(); ++mfi){
+//       amrex::Array4<amrex::Real> const& arr_new = KG_new.array(mfi);
+//       amrex::Array4<amrex::Real> const& arr_old = KG_old.array(mfi);
+//       amrex::Array4<amrex::Real> const& KG_arr = KG.array(mfi);
+//       printf("\n\narr_old(129, 129, 129, 0) = %e\narr_new(129, 129, 129, 0) = %e\n\n", arr_old(129, 129, 129), arr_new(129, 129, 129));
+//       
+//       amrex::Array4<amrex::Real> const& Phi_arr = Phi_new.array(mfi);
+//       amrex::Array4<amrex::Real> const& Phi_old_arr = Phi_old.array(mfi);
+//       const amrex::Box& bx = mfi.tilebox();
+//       amrex::ParallelFor(bx, [&] AMREX_GPU_DEVICE (int i, int j, int k)
+//         {
+//             KG_arr(i,j,k,0) = arr_new(i,j,k,0);
+//             KG_arr(i,j,k,1) = arr_new(i,j,k,1);
+//             Phi_arr(i,j,k,0) = Phi_old_arr(i,j,k,0);
+//             Phi_arr(i,j,k,1) = Phi_old_arr(i,j,k,1);
+//      });
+//      printf("\n\nphi_old: %e\nphi_new: %e/n/n", arr_new(64, 64, 64, 0), KG_arr(64, 64, 64, 0));
+//    }
+//    KG.FillBoundary(geom.periodicity()); 
+//    printf("\n\nTest4\n\n");
+
+//    printf("\n\nYour boolean variable is: %s\n\n", geom.isAllPeriodic() ? "true" : "false");
     gravity->solve_density_data(level, KG_new, density_new, invdeltasq, a, ap);
+//    density_new.FillBoundary(geom.periodicity());
+
+    // So it seems we can't just blindly copy the answer in...
+//    MultiFab::Copy(Phi_new[level], Phi_old[level], 0, 0, 1, 1);
+//    Phi_new.ParallelCopy(Phi_old, 0, 0, 1, 1, 1);  // LSR -- Copy Phi_old as an initial guess for the solver - will also do Phidot eventually. This doesn't work - maybe can't change the values this way? Need to see how previous code did it
+//    MultiFab::Copy(parent->getLevel(level).get_new_data(
+//                   AxNewt::getState(AxNewt::StateType::PhiGrav_Type)),
+//                 parent->getLevel(level).get_old_data(
+//                     AxNewt::getState(AxNewt::StateType::PhiGrav_Type)),
+//                 0, 0, 1, 0);
 
     gravity->solve_Phi_data(level, geom, density_new, Phi_new, a);
+//    Phi_new.FillBoundary(geom.periodicity());  // LSR -- this shouldn't be necessary if it is based on density_new, but maybe keep in case
+
+    const int i = 129,
+              j = 64,
+              k = 64;
+    for (amrex::MFIter mfi(KG_new,amrex::TilingIfNotGPU()); mfi.isValid(); ++mfi){
+         amrex::Array4<amrex::Real> const& arr_new = Phi_new.array(mfi);
+         amrex::Array4<amrex::Real> const& arr_old = density_new.array(mfi);
+         amrex::Array4<amrex::Real> const& KG = KG_new.array(mfi);
+
+//         printf("\n\nKG(%i, %i, %i, 0) = %e\nKGv(%i, %i, %i, 0) = %e\ndensity_new(%i, %i, %i, 0) = %e\nPhiGrav_new(%i, %i, %i, 0) = %e\n\n", 
+//         													    i, j, k, KG(i, j, k), 
+//         													    i, j, k, KG(i, j, k, 1), 
+//       													            i, j, k, arr_old(i, j, k), 
+//       													            i, j, k, arr_new(i, j, k));
+  }
 
     BL_PROFILE_VAR_STOP(KG_ADVANCE);
 
@@ -95,7 +155,7 @@ amrex::Real AxNewt::advance (amrex::Real time,
 
 void AxNewt::kick_KG(amrex::Real time, amrex::Real dt_half, amrex::MultiFab&  mf_old, amrex::MultiFab&  mf_new, amrex::MultiFab&  Phi_old, const amrex::Real invdeltasq) // LSR -- Not made by me, but advances field derivative
 {
-#ifdef COMOV_FULL
+#ifdef INFLATION
     amrex::Real a = Comoving::get_comoving_a(time), 
                 ap = Comoving::get_comoving_ap(time), 
                 app = Comoving::get_comoving_app(time);
@@ -114,18 +174,19 @@ void AxNewt::kick_KG(amrex::Real time, amrex::Real dt_half, amrex::MultiFab&  mf
             amrex::Array4<amrex::Real> const& arr_in   = fpi().array();
             amrex::Array4<amrex::Real> const& arr_old  = mf_old[fpi].array();
             amrex::Array4<amrex::Real> const& arr_new  = mf_new[fpi].array();
-
-            amrex::Array4<amrex::Real> const& arr_Phi  = Phi_old[fpi].array();
+//            printf("\n\nTesta\n\n");
+            amrex::Array4<amrex::Real> const& arr_Phi  = Phi_old[fpi].array();  // LSR -- How do we get access to Phi data in this region? Works for density so what is different?
+//            printf("\n\nTestb\n\n");
 
             amrex::ParallelFor(bx,
-                               [=] AMREX_GPU_DEVICE (int i, int j, int k)
+                               [&] AMREX_GPU_DEVICE (int i, int j, int k)
                                {
 
                                    amrex::Real tmp = 0.;
-#ifdef TEST  // Want this to be a way to decide whether or not to include gravity in EoM - TODO: implement this properly
-                                   tmp = Models::compute_acceleration(arr_in,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
+#ifndef TEST  // Want this to be a way to decide whether or not to include gravity in EoM - TODO: implement this properly
+                                   tmp = Models::compute_acceleration(arr_old,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
 #else
-                                   tmp = Models::compute_acceleration(arr_in,arr_Phi,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
+                                   tmp = Models::compute_acceleration(arr_old,arr_Phi,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
 #endif
                                    // Kick 1: v_{i+1/2}    =        v_i             +   a_i*dt/2
                                    // Kick 2: v_{i+1}    =        v_{i+1/2}         +   a_{i+1}*dt/2  

@@ -1,12 +1,17 @@
+// TODO: WIP - want to use this instead of AxKG, AxKGComov, and AxNewt advance
+
 #include <AxKG.H>
+#include <KG_compute_models.H>
+#ifdef COMOV_FULL
 #include <AxKGComov.H>
 #include <Comoving_Full.H>
-#include <KG_compute_models.H>
-
+#endif
+#ifdef NEWT
 #include <Newtonian.H>
 #include <AxNewt.H>
+#endif
 
-amrex::Real AxNewt::advance (amrex::Real time,
+amrex::Real AxKG::advance (amrex::Real time,
               amrex::Real dt,
               int  iteration,
               int  ncycle)
@@ -26,7 +31,11 @@ amrex::Real AxNewt::advance (amrex::Real time,
     amrex::Gpu::LaunchSafeGuard lsg(true);
 
     // Move newData to oldData
-    for (int k = 0; k < NUM_STATE; k++)
+#ifdef NEWT
+    for (int k = 0; k < AxNewt::nStates(); k++)
+#else
+    for (int k = 0; k < AxKG::nStates(); k++)
+#endif
     {
         state[k].allocOldData();
         state[k].swapTimeLevels(dt);
@@ -93,7 +102,7 @@ amrex::Real AxNewt::advance (amrex::Real time,
     return dt;
 }
 
-void AxNewt::kick_KG(amrex::Real time, amrex::Real dt_half, amrex::MultiFab&  mf_old, amrex::MultiFab&  mf_new, amrex::MultiFab&  Phi_old, const amrex::Real invdeltasq) // LSR -- Not made by me, but advances field derivative
+void AxKG::kick_KG(amrex::Real time, amrex::Real dt_half, amrex::MultiFab&  mf_old, amrex::MultiFab&  mf_new, amrex::MultiFab&  Phi_old, const amrex::Real invdeltasq) // LSR -- Not made by me, but advances field derivative
 {
 #ifdef COMOV_FULL
     amrex::Real a = Comoving::get_comoving_a(time), 
@@ -114,18 +123,19 @@ void AxNewt::kick_KG(amrex::Real time, amrex::Real dt_half, amrex::MultiFab&  mf
             amrex::Array4<amrex::Real> const& arr_in   = fpi().array();
             amrex::Array4<amrex::Real> const& arr_old  = mf_old[fpi].array();
             amrex::Array4<amrex::Real> const& arr_new  = mf_new[fpi].array();
-
-            amrex::Array4<amrex::Real> const& arr_Phi  = Phi_old[fpi].array();
+#ifdef NEWT
+            amrex::Array4<amrex::Real> const& arr_Phi  = Phi_old[fpi].array();  // LSR -- How do we get access to Phi data in this region? Works for density so what is different?
+#endif
 
             amrex::ParallelFor(bx,
-                               [=] AMREX_GPU_DEVICE (int i, int j, int k)
+                               [&] AMREX_GPU_DEVICE (int i, int j, int k)
                                {
 
                                    amrex::Real tmp = 0.;
-#ifdef TEST  // Want this to be a way to decide whether or not to include gravity in EoM - TODO: implement this properly
-                                   tmp = Models::compute_acceleration(arr_in,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
+#ifdef NEWT
+                                   tmp = Models::compute_acceleration(arr_old,arr_Phi,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
 #else
-                                   tmp = Models::compute_acceleration(arr_in,arr_Phi,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
+                                   tmp = Models::compute_acceleration(arr_old,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
 #endif
                                    // Kick 1: v_{i+1/2}    =        v_i             +   a_i*dt/2
                                    // Kick 2: v_{i+1}    =        v_{i+1/2}         +   a_{i+1}*dt/2  
@@ -138,7 +148,7 @@ void AxNewt::kick_KG(amrex::Real time, amrex::Real dt_half, amrex::MultiFab&  mf
 	}
 }
 
-void AxNewt::drift_KG(amrex::Real dt, amrex::MultiFab&  mf_old, amrex::MultiFab&  mf_new)  // LSR -- Not made by me, but advances field
+void AxKG::drift_KG(amrex::Real dt, amrex::MultiFab&  mf_old, amrex::MultiFab&  mf_new)  // LSR -- Not made by me, but advances field
 {
 	for (amrex::MFIter mfi(mf_new,amrex::TilingIfNotGPU()); mfi.isValid(); ++mfi){
 		amrex::Array4<amrex::Real> const& arr_old = mf_old.array(mfi);

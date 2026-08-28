@@ -198,7 +198,7 @@ void AxKG::variable_setup()
 
     // Establish the workhorse fields
     desc_lst.addDescriptor(getState(StateType::KG_Type), amrex::IndexType::TheCellType(),
-                           amrex::StateDescriptor::Point, 0, nFields(), 
+                           amrex::StateDescriptor::Point, 1, nFields(), 
 			   KGinterp, state_data_extrap, 
 			   store_in_checkpoint);
 
