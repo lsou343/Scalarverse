@@ -1,0 +1,5 @@
+First attempt at attractive gravitational interactions.
+
+Generally seems like not very much is different between this and repulsive - might be worth investigating.
+
+Other options: dial gravity up by several orders of magnitude and see what changes.

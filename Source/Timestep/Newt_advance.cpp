@@ -50,8 +50,12 @@ amrex::Real AxNewt::advance (amrex::Real time,
 
     amrex::MultiFab&  density_new = get_level(level).get_new_data(AxNewt::getState(AxNewt::StateType::Density_Type));
 
-    amrex::MultiFab&  Phi_old = get_level(level).get_old_data(AxNewt::getState(AxNewt::StateType::PhiGrav_Type));  // LSR -- Probably do need this though for AxKG eventually
-    amrex::MultiFab&  Phi_new = get_level(level).get_new_data(AxNewt::getState(AxNewt::StateType::PhiGrav_Type));
+    amrex::MultiFab&  Phi_old = get_level(level).get_old_data(AxNewt::getState(AxNewt::StateType::PhiGrav_Type));  // LSR -- Do we need to call Phi_old? Or is this just slowing us down?
+    amrex::MultiFab&  Phi_new = get_level(level).get_new_data(AxNewt::getState(AxNewt::StateType::PhiGrav_Type));  // Other option - never move Phi_new -> Phi_old
+    MultiFab::Copy(parent->getLevel(level).get_new_data(AxNewt::getState(AxNewt::StateType::PhiGrav_Type)),
+                   parent->getLevel(level).get_old_data(AxNewt::getState(AxNewt::StateType::PhiGrav_Type)),
+                   0, 0, 1, 0);
+
 
     ///// Following the Kick-Drift-Kick formulation of the Leapfrog integration algorithm:
     //
@@ -122,11 +126,14 @@ void AxNewt::kick_KG(amrex::Real time, amrex::Real dt_half, amrex::MultiFab&  mf
                                {
 
                                    amrex::Real tmp = 0.;
-#ifdef TEST  // Want this to be a way to decide whether or not to include gravity in EoM - TODO: implement this properly
-                                   tmp = Models::compute_acceleration(arr_in,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
-#else
-                                   tmp = Models::compute_acceleration(arr_in,arr_Phi,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
-#endif
+//#ifndef TEST  // Want this to be a way to decide whether or not to include gravity in EoM - TODO: implement this properly
+                                   if (time > 50.) {
+                                     tmp = Models::compute_acceleration(arr_in,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
+//#else
+                                   } else {
+                                     tmp = Models::compute_acceleration(arr_in,arr_Phi,i,j,k,AxKG::getField(AxKG::Fields::KGf),invdeltasq, a, ap, app);
+                                   }
+//#endif
                                    // Kick 1: v_{i+1/2}    =        v_i             +   a_i*dt/2
                                    // Kick 2: v_{i+1}    =        v_{i+1/2}         +   a_{i+1}*dt/2  
                                    arr_new(i,j,k,AxKG::getField(AxKG::Fields::KGfv)) = arr_old(i,j,k,AxKG::getField(AxKG::Fields::KGfv)) + dt_half*tmp;

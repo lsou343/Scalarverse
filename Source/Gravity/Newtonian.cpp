@@ -1281,5 +1281,5 @@ void Gravity::solve_rhs(int level,
   //CorrectRhsUsingOffset(level, rhs);
   rhs.mult(Ggravity, 0);
   rhs.FillBoundary(geom.periodicity());
-  printf("\nrho_avg: %e\n\n", rho_avg);
+//  printf("\nrho_avg: %e\n\n", rho_avg);
 }

@@ -470,8 +470,8 @@ protected:
           {
             prob_initdata_mom(i, j, k, fab_new, geom.data(), prob_param);
 	    
-            // Set the 0-mode to 0 since we add it in later
-            if (i == 0 && j == 0 && k == 0) {
+            // Set the 0-mode to 0 since we add it in later // LSR -- LE sets 0 AND N/2 separately, why not here?
+            if (i == 0 && j == 0 && k == 0) {  // LSR -- This may not work with multiprocessing. Also, why do we even need it? Removing this does fix the oddly sized components - where are they getting added back?
               for (int comp = 0; comp < fillK.nComp(); comp++)
                 fab_new(0, 0, 0, comp) = amrex::GpuComplex(
                     0., 0.); // Set the 0-mode to 0 since we add it in later

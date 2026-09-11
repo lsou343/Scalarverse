@@ -47,13 +47,13 @@ amrex::Real compute_acceleration (amrex::Array4<amrex::Real> const& arr, amrex::
 
     if (a == 0.)
     {
-        ret = grad2F * (1 + 4*pow(a, 2.*(AxKG::s - AxKG::r)) / (AxKG::A*AxKG::A) * phi(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGrav)));
+        ret = grad2F * (1 - 4*pow(a, 2.*(AxKG::s - AxKG::r)) / (AxKG::A*AxKG::A) * phi(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGrav)));
     }
     else
     {
         ret =
             //// a^{-2s - 2}\nabla^2 f_pr
-            pow(a,-2.*AxKG::s-2.) * (1 + 4*pow(a, 2.*(AxKG::s - AxKG::r)) / (AxKG::A*AxKG::A) *phi(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGrav)))*grad2F
+            pow(a,-2.*AxKG::s-2.) * (1 - 4*pow(a, 2.*(AxKG::s - AxKG::r)) / (AxKG::A*AxKG::A) *phi(i,j,k,AxNewt::getField(AxNewt::Fields::PhiGrav)))*grad2F
             // LSR -- Comp is the field (0) - only currently looks at field values but can also do field derivatives
 
             //// + (r(s-r+2)*(a'/a)^2 + r*a''/a)f_pr

@@ -51,8 +51,8 @@ void Derived::derPhiGrav(const amrex::Box& bx, amrex::FArrayBox& derfab, int dco
     auto const der = derfab.array();
 
     amrex::Real coef = AxKG::A * AxKG::A;
-#ifdef INFLATION
-    coef *= Comoving::get_comoving_a() * Comoving::get_comoving_a();
+#ifdef COMOV_FULL
+    coef *= std::pow(Comoving::get_comoving_a(), -2.*AxKG::s + 2.*AxKG::r);
 #endif
 
     amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
@@ -67,13 +67,18 @@ void Derived::derPhiGravv(const amrex::Box& bx, amrex::FArrayBox& derfab, int dc
     auto const dat = datfab.array();
     auto const der = derfab.array();
 
-    amrex::Real coef = AxKG::A * AxKG::A;
-#ifdef INFLATION
-    coef *= Comoving::get_comoving_a() * Comoving::get_comoving_a();
+    amrex::Real coef = AxKG::B;
+    coef /= AxKG::A * AxKG::A;
+#ifdef COMOV_FULL
+    coef *= std::pow(Comoving::get_comoving_a(), 3.*AxKG::s - 2.*AxKG::r);
+    amrex::Real H = Comoving::get_comoving_ap() / Comoving::get_comoving_a();
+#else
+    amrex::Real H = 0.;
 #endif
 
     amrex::ParallelFor(bx, [=] AMREX_GPU_DEVICE(int i, int j, int k) noexcept {
-        der(i, j, k, dcomp) = dat(i, j, k, AxNewt::getField(AxNewt::Fields::PhiGrav)) / coef;
+        amrex::Real Phi_dot = dat(i, j, k, AxNewt::getField(AxNewt::Fields::PhiGravv)) + 2. * (AxKG::s - AxKG::r) * H * dat(i, j, k, AxNewt::getField(AxNewt::Fields::PhiGrav));
+        der(i, j, k, dcomp) = Phi_dot / coef;
     });
 }
 

@@ -161,37 +161,40 @@ void AxKG::prob_initdata_mom(
       // << omega << std::endl;
 
       // Random initializers
-      amrex::Real X = rand_uniform();                  // amrex::Random();
+      amrex::Real X1 = rand_uniform();                 // amrex::Random();
+      amrex::Real X2 = rand_uniform();                 // amrex::Random();
       amrex::Real theta1 = 2. * M_PI * rand_uniform(); // amrex::Random();
       amrex::Real theta2 = 2. * M_PI * rand_uniform(); // amrex::Random();
 
       // LatticeEasy magnitude
       amrex::Real W2 = A * A * B * B * L * L * L /
                        (2. * omega * dx * dx * dx * dx * dx * dx);
-      amrex::Real fMag = std::sqrt(-1. * W2 * std::log(X));
+      amrex::Real fMag1 = std::sqrt(-1. * W2 * std::log(X1));
+      amrex::Real fMag2 = std::sqrt(-1. * W2 * std::log(X2));
 
       // Return values
       amrex::Real fR, fI, fdR, fdI;
 
       // Impose a cutoff, if desired
       if (cutoff == 0 || i * i + j * j + k * k < cutoff * cutoff) {
-        fR = invsqrt2 * (std::cos(theta1) + std::cos(theta2)) * fMag;
-        fI = invsqrt2 * (std::sin(theta1) + std::sin(theta2)) * fMag;
+        fR = invsqrt2 * ((std::cos(theta1) * fMag1) + (std::cos(theta2)) * fMag2);
+        fI = invsqrt2 * ((std::sin(theta1) * fMag1) + (std::sin(theta2)) * fMag2);
       } else {
         fR = 0;
         fI = 0;
       }
 
       if (cutoff == 0 || i * i + j * j + k * k < cutoff * cutoff) {
-        fdR = (invsqrt2 * (std::sin(theta1) - std::sin(theta2)) * fMag *
+        fdR = (invsqrt2 * ((std::sin(theta1) * fMag1) - (std::sin(theta2)) * fMag2) *
                omega); // ori
-        fdI = (invsqrt2 * (std::cos(theta2) - std::cos(theta1)) * fMag *
+        fdI = (invsqrt2 * (-(std::cos(theta1) * fMag1) + (std::cos(theta2)) * fMag2) *
                omega); // ori
 #ifdef COMOV_FULL
         fdR += Comoving::get_comoving_ap() * fR * (AxKG::r - 1.);
         fdI += Comoving::get_comoving_ap() * fI * (AxKG::r - 1.);
 #endif
-      } else {
+      } 
+      else {
         fdR = 0;
         fdI = 0;
 #ifdef COMOV_FULL

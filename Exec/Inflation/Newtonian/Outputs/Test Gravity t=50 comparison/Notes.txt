@@ -1,0 +1,3 @@
+Gravity turning on at t=50
+
+Slight difference compared to no gravity, but still a difference!
